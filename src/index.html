@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<!--
+   https://www.codefor.de/koeln/
+   contact@opendemdata.info
+   based on Openlayers: https://openlayers.org/
+   License: BSD 2-Clause License
+   https://tldrlegal.com/license/bsd-2-clause-license-(freebsd)
+   -->
+<html lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Denkmalpflege 3D Köln">
+  <meta name="keywords" content="3D, Satdtmodell, Denkmäler, Köln, Open Data, OpenLayers">
+  <meta name="author" content="contact@opendemdata.info">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- No Google yet-->
+  <meta name="robots" content="noindex" />
+  <title>Denkmal 4D Köln</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
+    }
+
+    .map {
+      width: 100%;
+      height: calc(100% - 65px);
+      top: 65px !important;
+    }
+
+    .ol-viewport {
+      overflow: unset !important;
+    }
+
+    .marginleft {
+      margin-left: 10px;
+    }
+
+
+
+    .loader {
+      position: absolute;
+      bottom: 50px;
+      right: 50px;
+      display: none;
+    }
+
+    #editNonModal {
+      position: absolute;
+      top: 63px;
+      left: 0px;
+      left: 8px;
+      width: 300px;
+      height: 50px;
+      background: white;
+      display: none;
+      padding: 5px;
+    }
+
+    #deleteNonModal {
+      position: absolute;
+      top: 63px;
+      left: 0px;
+      left: 8px;
+      width: 300px;
+      height: 50px;
+      background: white;
+      display: none;
+      padding: 5px;
+    }
+
+    #createNonModal {
+      position: absolute;
+      top: 63px;
+      left: 0px;
+      left: 8px;
+      width: 300px;
+      height: 180px;
+      background: white;
+      display: none;
+      padding: 5px;
+    }
+
+    .head {
+      height: 55px;
+      color: white;
+    }
+
+    body {
+      background-color: black;
+    }
+
+    .ol-zoom {
+      top: 250px !important;
+      right: 3px !important;
+      left: auto !important;
+    }
+
+    .noiseselect {
+      .position: absolute;
+      top: 10px;
+      width: 250px;
+      height: 200px;
+      left: 10px;
+      background-color: lightblue !important;
+    }
+
+    .objSpanNode {
+      left: 10px;
+      position: absolute;
+      top: 180px;
+    }
+
+    .objSpanNode2 {
+      left: 210px;
+      position: absolute;
+      top: 180px;
+    }
+
+    .switchDiv {
+      background: url("images/show.svg");
+    }
+
+    .switchDivHide {
+      background: url("images/hide.svg");
+    }
+
+    .LayerSwitchDiv {
+      background: url("images/dop.png");
+    }
+
+    .LayerSwitchDivK {
+      background: url("images/karte.png");
+      border: solid 1px white;
+    }
+
+    .CreateDiv {
+      background: url("images/create_old.svg");
+      background-color: white;
+    }
+
+    .EditDiv {
+      background: url("images/edit.svg");
+      background-color: white;
+    }
+
+    .DeleteDiv {
+      background: url("images/delete.svg");
+      background-color: white;
+    }
+
+    .LocationDiv {
+      background: url("images/location.svg");
+      background-color: white;
+    }
+
+    .ol-popup {
+      position: absolute;
+      background-color: white;
+      -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+      filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #cccccc;
+      bottom: 12px;
+      left: -50px;
+      min-width: 280px;
+      z-index: 99999;
+    }
+
+    .ol-popup:after,
+    .ol-popup:before {
+      top: 100%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .ol-popup:after {
+      border-top-color: white;
+      border-width: 10px;
+      left: 48px;
+      margin-left: -10px;
+    }
+
+    .ol-popup:before {
+      border-top-color: #cccccc;
+      border-width: 11px;
+      left: 48px;
+      margin-left: -11px;
+    }
+
+    .ol-popup-closer {
+      text-decoration: none;
+      position: absolute;
+      top: 2px;
+      right: 8px;
+    }
+
+    .ol-popup-closer:after {
+      content: "✖";
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+
+    .popupMain {
+      height: 100px;
+      overflow-y: scroll;
+    }
+
+    .languageIcon {
+      position: relative;
+      top: 5px;
+    }
+
+    .languageIconGiessen {
+      position: relative;
+      background-color: white;
+    }
+
+    .title {
+      float: left;
+      top: -20px;
+      position: relative;
+    }
+
+    .head {
+      color: white;
+    }
+
+    .modal3.open {
+      display: grid;
+      grid-template-rows: 100px auto 100px;
+    }
+
+    .modal3_content {
+      overflow-y: auto;
+    }
+
+    .bigradio {
+      min-height: 20px;
+      min-width: 20px;
+    }
+
+    .modal_header {
+      height: 40px;
+    }
+
+    .modal_header_fi {
+      height: 0px;
+    }
+
+    .modal_footer {
+      position: absolute;
+      bottom: 70px;
+      right: 100px;
+    }
+
+    .closeInfo {
+      right: 50px;
+      top: 15px;
+      position: absolute;
+    }
+
+    .modal_content {
+      margin-right: 30px;
+      overflow: auto;
+      height: calc(100% - 140px);
+    }
+
+    /* Extra small devices (phones, 600px and down) */
+    @media only screen and (max-width: 600px) {
+      .modal3 {
+        padding: 20px;
+        display: none;
+        height: 100%;
+        left: 0;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background-color: black;
+        color: white;
+        z-index: 9999;
+      }
+    }
+
+    /* Small devices (portrait tablets and large phones, 600px and up) */
+    @media only screen and (min-width: 600px) {
+      .modal3 {
+        padding: 20px;
+        display: none;
+        position: fixed;
+        top: 100px;
+        left: 50px;
+        right: 50px;
+        bottom: 150px;
+        background-color: black;
+        color: white;
+        z-index: 9999;
+      }
+    }
+
+    a:link {
+      color: blue;
+    }
+
+    a:visited {
+      color: blue;
+    }
+
+    a:hover {
+      color: lightblue;
+    }
+
+    a:active {
+      color: blue;
+    }
+
+    a.blackdiv:link {
+      color: lightblue;
+    }
+
+    a.blackdiv:visited {
+      color: lightblue;
+    }
+
+    a.blackdiv:hover {
+      color: lightcyan;
+    }
+
+    .kreis_red {
+      width: 15px;
+      height: 15px;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: Red;
+      margin-left: 10px;
+      float: left;
+    }
+
+    .kreis_green {
+      width: 15px;
+      height: 15px;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: rgb(0, 255, 0);
+      margin-left: 10px;
+      float: left;
+    }
+
+    .kreis_yellow {
+      width: 15px;
+      height: 15px;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: yellow;
+      margin-left: 10px;
+      float: left;
+
+    }
+
+    #legende {
+      position: absolute;
+      bottom: 10px;
+      width: 150px;
+      height: 80px;
+      z-index: 9999;
+      background-color: white;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <div id="head" class="head">
+    <h1 id="titleApp" class="title"> Denkmal 4D Köln&nbsp; </h1>
+    <img class="languageIcon" id="helpIcon" src="images/help.png" title="Über, Hilfe und Daten"
+      alt="Über, Hilfe und Daten" height="45" width="45">
+    <img class="languageIcon" id="legalIcon" src="images/legal.png" title="Rechtliches" alt="Rechtliches" height="45"
+      width="45">
+    <img class="languageIcon" id="storyIcon" src="images/story.png" title="Erfolgsgeschichten" alt="Erfolgsgeschichten"
+      height="45" width="45">
+  </div>
+
+  <div id="map" class="map"></div>
+  <div id="popup" class="ol-popup">
+    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+    <div id="popup-content"></div>
+  </div>
+  <div id="help" class="modal3">
+    <div id="helpHeader" class="modal_header">
+      <div id="helpText" class="modal_headerText">Über, Hilfe und Daten</div>
+      <img id="closeHelp" class="closeInfo" src="images/close.svg" alt="close" width="30" height="30">
+    </div>
+    <div id="selectHelp" class="modal_content">
+      <nav>
+        <a class="blackdiv" href="#hilfe_anker">Hilfe</a><br />
+        <a class="blackdiv" href="#hilfe_model">Anleitung 3D Modelle erstellen</a><br />
+        <a class="blackdiv" href="#hilfe_wikimedia">Anleitung Fotos in Wikimedia einpflegen</a><br />
+        <a class="blackdiv" href="#hilfe_wikipedia">Anleitung Wikipedia Artikel schreiben</a><br />
+        <a class="blackdiv" href="#hilfe_osm">Anleitung Daten in OSM einpflegen</a><br />
+        <a class="blackdiv" href="#oklab">Über CodeforCologne [OK-Lab Köln]</a><br />
+        <a class="blackdiv" href="#data_download">Daten Downkload</a><br />
+      </nav>
+      <h4>Mit dieser Web Anwendung könnt Ihr Metadaten über die Denkmäler der Stadt Köln pflegen.
+        Der besondere Fokus liegt auf der Verlinkung von exisitierenden 3D Modellen und der Erfassung geplanter Modelle.
+        Ziel ist eine möglichst vollständige Erfassung aller Denkmäler als 3D Modelle. Diese sollen dann zukünftig in
+        der Web-3D Anwendung erkundet werden können.
+      </h4>
+      <p>Die zugrunde liegende <a class="blackdiv" target="_blank"
+          href="https://www.offenedaten-koeln.de/dataset/denkmalliste-stadt-koeln"> Denkmalliste der Stadt Köln </a> ist
+        ein freier
+        Datensatz (<a class="blackdiv" target="_blank" href="https://www.govdata.de/dl-de/zero-2-0">
+          Datenlizenz Deutschland – Zero – Version 2.0</a>) der Stadt (letzte Aktualisierung 26.07.2022).<br />
+        Doch nicht alle Zeuhnisse der Geschichte stehebn unter Denkmalschutz. Der als Zeugnis der Kalker
+        Industriegeschichte aufgetsellt Turboverdichter aus der Sodaproduktion der vormaligen Chemischen Fabrik Kalk
+        gehört z.B. dazu (Ecke Kalker Hauspstraße/Kaplellenstraße).
+        Deswegen habt Ihr hier die Möglichkeit neue Denkmäler anzulegen, Denkmäler zu editieren und Denkmäler zu
+        löschen.
+      </p>
+      <p>Deine Arbeiten stehen dann wieder Allen unter freien Lizenzen zur Verfügung.</p>
+
+
+      <h2 id="hilfe_anker">Hilfe</h2>
+      <h4>Auswahl der zu pflegenden Kategorien</h4>
+      <p>In der linken oberen Ecke der Kartenanwendung können die Kategorien ausgewählt werden die es hier zu pflegen
+        gibt.</p>
+      <img src="images/nav.png" alt="Auswahl der zu pflegenden Kategorien">
+      <p>Der Stand der Bearbeitung ist der Legende zu entnehmen.</p>
+
+      <h4>Objektinformationen abfragen</h4>
+      <p>Durch das Anklicken oder Antippen eines Denkmales öffnet sich die Detailinformationen:</p>
+      <img src="images/featureinfo.png" alt="FeatureInfo">
+      <p>Wenn noch kein 3D Model eingeflegt wurde, hast Du hier die Möglichkeit über den Button "Klar, da kümmere ich
+        mich drum!" das Denkmal als "in Arbeit" zu markieren. Dann wissen andere, dass für dieses Denkmal zukünftig ein
+        3D Modell erstellt wird. </p>
+      <img src="images/featureinfo_maintain.png" alt="FeatureInfo in Arbeit nehmen">
+
+      <h4>Hintergrundkarte wechseln</h4>
+      <p>In der oberen rechten Ecke der Karte befindet isch ein Icon um zwischen der <a class="blackdiv" target="_blank"
+          href="https://www.openstreetmap.de/">OpenStreetMap</a> Karte und dem Luftbilddienst von <a class="blackdiv"
+          target="_blank"
+          href="https://www.bezreg-koeln.nrw.de/brk_internet/geobasis/webdienste/geodatendienste/">Geobasis NRW</a> zu
+        wechseln.
+        Die Luftbilder besitzen eine Auflösung von 10cm und sind recht aktuell (der Aufnahmezyklus wurde ab 2020 auf 2
+        Jahre verkürzt).
+      </p>
+      <img src="images/layerswitcher.png" alt="Karte/Luftbild umschalten">
+      <h4>Denkmal anlegen</h4>
+      <p>
+        Mittels des Icons lassen sich neue Denkmäler anlegen:
+      </p>
+      <img src="images/create_denkmal.png" alt="Denkmal anlegen" height="45" width="45">
+      <p>Es öffnet sich am linken oberen Rand der Karte ein Fenster.</p>
+      <img src="images/create_denkmal_coord.png" alt="Denkmal anlegen Koordinaten">
+      <p>Nachdem der Standort des neuen Denkmals durch einen Klick in die Karte definiert wurde, können über den Button
+        "weiter" dessen Attribute eingegeben werden.<br />
+      </p>
+      <p> Alle Angaben sind optional, nur die Lizenzbedingung muss akzeptiert werden.</p>
+
+      <h4>Denkmal editieren</h4>
+      <p>Mittels des Icons lassen sich Denkmäler editieren:</p>
+      <img src="images/edit_denkmal.png" alt="Denkmal editieren">
+      <p>Es öffnet sich am linken oberen Rand der Karte ein Fenster.</p>
+      <img src="images/edit_denkmal_select.png" alt="Denkmal Editieren Selektion">
+      <p>Nachdem Ihr auf ein Denkmal in der Karte geklickt habt, könnt Ihr dessen Attribute editieren.</p>
+
+      <h4>Denkmal löschen</h4>
+      <p> Mittels des Icons lassen sich Denkmäler löschen:</p>
+      <img src="images/delete_denkmal.png" alt="Denkmal löschen">
+      <p>Die Daten der gelöschten Denkmäler werden in einer separaten Tabelle gespeichert und sind nicht verloren.</p>
+
+      <h4>Auf meinen aktuellen Standort zoomen</h4>
+      <p>Mittels des Icons könnt Ihr auf Euren aktuellen Standort zoomen:</p>
+      <img src="images/standort_zoom.png" alt="Auf den aktuellen Standort zoomen.">
+      <p>Oft ist es im Feld gar nicht so einfach den Überblick zu behalten. Hiermit könnt Ihr auf Euren aktuellen
+        Standort zoomen, sofern Ihr vorher der Anwendung dies erlaubt habt.
+        Das GPS hat allerdings so seine Einschränkungen, besonders in Häuserschluchten. Erwartet daher keine exakte
+        Lokalisierung.
+      </p>
+
+      <h2 id="hilfe_model">Wie kann ich 3D Modelle erstellen?</h2>
+      <h3>1. Meshroom:</h3>
+      <ul>
+        <li>Meshroom ist eine Open-Source-Software zur 3D-Rekonstruktion aus Fotos.</li>
+        <li>Sie verwendet Fotogrammmetrie, um aus einer Reihe von 2D-Bildern ein 3D-Modell zu erstellen.</li>
+        <li><strong>Einfach zu bedienen</strong>: Die Benutzeroberfläche ist intuitiv und leicht verständlich.</li>
+      </ul>
+      <p><strong><i>Wie funktioniert Meshroom?</i></strong></p>
+      <ol>
+        <li><strong>Fotos aufnehmen</strong>: Machen Sie Fotos von dem Objekt, das Sie in 3D rekonstruieren möchten.
+          Achten Sie darauf,
+          dass die Fotos aus verschiedenen Perspektiven aufgenommen werden und dass sich die Bilder überlappen.</li>
+        <li><strong>Fotos in Meshroom importieren</strong>: Starten Sie Meshroom und importieren Sie die Fotos.</li>
+        <li><strong>3D-Rekonstruktion starten</strong>: Meshroom berechnet automatisch die Position der Kamera und
+          erstellt ein 3D-Modell
+          aus den Fotos.</li>
+        <li><strong>3D-Modell bearbeiten</strong>: Das 3D-Modell kann in Meshroom weiter bearbeitet werden, z. B. können
+          Sie die
+          Textur
+          hinzufügen oder das Modell in ein anderes Format exportieren.</li>
+      </ol>
+      <p><strong>Installation</strong>: <a class="blackdiv" target="_blank"
+          href="https://alicevision.org/#meshroom">https://alicevision.org/#meshroom</a><br />
+        <strong>Video-Tutorial</strong>: <a class="blackdiv" target="_blank"
+          href="https://www.youtube.com/watch?v=eiEaHLNJJ94">https://www.youtube.com/watch?v=eiEaHLNJJ94</a>
+      </p>
+      <h3>2. MeshLab:</h3>
+      <ul>
+        <li>MeshLab ist eine Open-Source-Software zur Verarbeitung und Bearbeitung von 3D-Dreiecksnetzen.</li>
+        <li>Es bietet eine Reihe von Werkzeugen zum Bearbeiten, Bereinigen, Reparieren, Inspizieren, Rendern,
+          Texturieren und Konvertieren von Netzen.</li>
+      </ul>
+      <p><strong><i>Wie funktioniert Meshlab?</i></strong></p>
+      <ul>
+        <li><strong>Laden und Anzeigen von 3D-Modellen in verschiedenen Formaten</strong></li>
+        <li><strong>Reinigen und Reparieren von 3D-Modellen</strong>: Rauschen entfernen, Löcher füllen, Decimierung,
+          Normalen
+          berechnen</li>
+        <li><strong>Bearbeiten von 3D-Modellen</strong>: Skalieren, Drehen, Verschieben, Verformen, Punkte
+          hinzufügen/entfernen,
+          Polygonnetze erstellen</li>
+        <li><strong>Visualisierung von 3D-Modellen</strong>: Farbe und Textur ändern, Drahtgitter und Punkte anzeigen,
+          Schnittansichten erstellen, 2D-Ansichten erstellen</li>
+        <li><strong> Konvertierung von 3D-Modellen zwischen verschiedenen Dateiformaten</strong></li>
+      </ul>
+      <p><strong>Installation</strong>: <a class="blackdiv" target="_blank"
+          href="https://www.meshlab.net/#download">https://www.meshlab.net/#download</a>, oder ein Ticket für StadtPC
+        erstellen (für AZ-Mitarbeiter ist die Nutzung der städtischen Rechner erlaubt).<br />
+        <strong>Video-Tutorial</strong>: <a class="blackdiv" target="_blank"
+          href="https://www.youtube.com/user/mrpmeshlabtutorials">https://www.youtube.com/user/mrpmeshlabtutorials</a>
+      </p>
+      <p>Alternative Photogrammetrie-Software:
+      <ul>
+        <li>Reality Capture</li>
+        <li>Colab</li>
+        <li>Luma AI</li>
+        <li>Polycam</li>
+      </ul>
+      </p>
+      <p>Mobile Photogrammetrie-Apps:
+      <ul>
+        <li>Capture Reality</li>
+        <li>Widar</li>
+        <li>Luma AI</li>
+        <li>Polycam</li>
+      </ul>
+      </p>
+      <h2 id="hilfe_wikimedia">Anleitung Fotos in Wikimedia einpflegen</h2>
+      <p><a class="blackdiv" target="_blank" href="https://de.wikipedia.org/wiki/Hilfe:Bildertutorial">Hier geht es zum
+          Wikipedia Bildertutorial</a>
+      </p>
+      <h2 id="hilfe_wikipedia">Anleitung Wikipedia Artikel schreiben</h2>
+      <p><a class="blackdiv" target="_blank" href="https://de.wikipedia.org/wiki/Hilfe:Neuen_Artikel_anlegen">Hier geht
+          es zur Wikipedia Hilfe:
+          Neuen Artikel anlegen</a>
+      <p>Nach den <a class="blackdiv" target="_blank"
+          href="https://de.wikipedia.org/wiki/Wikipedia:Relevanzkriterien#Bauwerke,_Denkm%C3%A4ler_und_Naturdenkm%C3%A4ler">Wikipedia
+          Relevanzkriterien für Denkmäler</a>,
+        sind Kulturdenkmäler relevant, die in der offiziellen Denkmalliste stehen.</p>
+      </p>
+      <h2 id="hilfe_osm">Anleitung Daten in OSM einpflegen</h2>
+      <p>Um Daten in OpenStreetMap pflegen zu können, muss zunächst ein Account erstellt werden:
+        <a class="blackdiv" target="_blank" href="https://www.openstreetmap.org/user/new">zur Registrierung</a>
+      </p>
+      <p>Über den "Bearbeiten" Button in der linken oberen Ecke von <a class="blackdiv" target="_blank"
+          href="https://www.openstreetmap.org">www.openstreetmap.org</a> geht es dann los.</p>
+      <p>Falls das Objekt noch nicht verfügbar sein sollte, kannst Du über das Menü oben z.B. einen neuen Punkt für
+        ein
+        Denkmal anlegen:</p>
+      <img src="images/osm_point.png" alt="OSM Punk anlegen">
+      <p>Rechts kannst Du eine andere Hintergrundkarte auswählen. Die Luftbilder des Landes NRW sind recht aktuell
+        (2-Jahres-Zyklus) und besitzen
+        mit 10 cm eine hervorragende Auflösung. Dies hilft sehr, die richtige Lokalisierung für den Punkt zu finden.
+        Die Bezeichnung vDOP oben im Bild steht für vorläufige Digitale Orthofotos. Diese werden nur temporär
+        dargestellt,
+        bis die qualitätsgesicherte Version abgeschlossen ist. Deswegen sind diese auch nicht überall verfügbar.
+        In diesem Fall auf "NRW Orthofoto" umschalten.</p>
+      <p>Durch einen Klick in die Karte kann der Punkt dann gesetzt werden.</p>
+      <p>Auf der linken Seite öffnet sich ein Kontextmenü, dort nach Denkmal suchen und auswählen:</p>
+      <img src="images/osm_tag.png" alt="OSM Tag">
+      <p>Es können dann noch mehrere Merkmale vergeben werden:</p>
+      <img src="images/osm_tagging.png" alt="OSM Merkmale">
+      <p>Uns interessiert hier hauptsächlich der Link zum 3D Modell. Dafür wird zwar <i>building:model = URL</i>
+        <a class="blackdiv" target="_blank" href="https://wiki.openstreetmap.org/wiki/3D_development/Tagging">hier</a>
+        vorgeschlagen, doch wird dies kaum verwendet.
+      </p>
+      <p> Es existiert aber ein eigenes OSM Repository für 3D Modelle: <a class="blackdiv" target="_blank"
+          href="https://3dmr.eu/">3dmr.eu</a></p>
+      <p>Leider ist die Anzahl der Modelle noch recht übersichtlich, aber dies können wir ja ändern.</p>
+      <p> Das entsprechende Merkmal lautet: <i>3dmr=id</i> (des Modells im Repository).</p>
+      <p>Links zu Fotos in der <a class="blackdiv" target="_blank" href="https://www.wikimedia.de/">Wikimedia</a>,
+        lassen sich via <i>wikimedia_commons = File:name.jpeg</i> einfach einbinden.</p>
+      <p>Einen Wikipedia Artikel könnt Ihr via <i>wikipedia = de:Name der Seite</i> einbinden.</p>
+
+
+
+      <h2 id="oklab">Über CodeforCologne [OK-Lab Köln]</h2>
+      <p>CodeForCologne oder OK Lab Köln ist eine regionale Gruppe von Designern, Entwicklerinnen, Journalisten und
+        Anderen, die sich regelmäßig treffen, um an nützlichen Anwendungen rund um Offene Daten zu arbeiten. Unser
+        Treffen findet alle zwei Wochen statt. Schaut einfach in unserer <a class="blackdiv" target="_blank"
+          href="https://www.meetup.com/de-DE/codeforcologne/">Meetup Gruppe</a> vorbei!</p>
+      <a class="blackdiv" target="_blank" href="https://codefor.de/koeln/"><img src="images/oklab_koelle.png"
+          alt="CodeforCologne"></a>
+      <h2 id="data_download">Daten Download</h2>
+      <p>Die Daten werden täglich um 6:10 aufbereitet, und stehen als gezipptes Geojson zur Verfügung.</p>
+      Lizenzbedingungen:
+      <a class="blackdiv" target="_blank" href="https://www.govdata.de/dl-de/zero-2-0">Data licence Germany -
+        Zero - Version 2.0 (dl-de/zero-2-0)</a>
+
+      <h2><a class="blackdiv" target="_blank" href="https://opendem.info/downloads/denkmaeler.zip">zum Download</a>
+      </h2>
+      <div id="helpFooter" class="modal_footer">Denkmal 4D Köln</div>
+    </div>
+  </div>
+  <div id="legal" class="modal3">
+    <div id="legalHeader" class="modal_header">
+      <div id="legalText" class="modal_headerText">Legal Notes</div>
+      <img id="closeLegal" class="closeInfo" src="images/close.svg" alt="close" width="30" height="30">
+    </div>
+    <div id="selectLegal" class="modal_content">
+      <h2 id="legal_headline">Rechtliche Hinweise</h2>
+      <h3 id="impress">Impressum</h3>
+      <p id="impress_text">Verantwortlich für diesen Webauftritt ist: <br />Martin Over,<br /> c/o OK Lab Köln,<br />
+        Hackländerstraße 2,<br /> 50825 Köln,<br /> contact(at)OpenDEMData.info</p>
+      <h3 id="disclaimer">Haftungsausschluss</h3>
+      <h4 id="legal_disclaimer_content">Haftung für Inhalte</h4>
+      <p id="legal_disclaimer_content_text">Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die
+        Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als
+        Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen
+        verantwortlich. Nach § 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder
+        gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige
+        Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den
+        allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der
+        Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen
+        werden wir diese Inhalte umgehend entfernen.</p>
+      <h4 id="legal_disclaimer_content_links">Haftung für Links</h4>
+      <p id="legal_disclaimer_content_links_text">Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren
+        Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen.
+        Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+        Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige
+        Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten
+        Seiten ist jedoch ohne konkrete Anhaltspunkte</p>
+      <h4 id="legal_author">Urheberrecht</h4>
+      <p id="legal_author_text">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen
+        dem deutschen Urheberrecht. Sie sind mit einer Creative Commons Lizenz urheberrechtlich geschützt. Sofern nicht
+        anders angegeben, stehen die Inhalte dieser Seite unter der Creative Commons Namensnennung 3.0 DE Lizenz. Soweit
+        die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet.
+        Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine
+        Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von
+        Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.</p>
+      <h3 id="data_privacy_statement">Datenschutzerklärung</h3>
+      <h4 id="data_privacy_statement_text1">Bereitstellung der Website und Erstellung von Protokoll- oder Log-Dateien
+      </h4>
+      <h4 id="data_privacy_statement_text2">Welche Daten werden verarbeitet?</h4>
+      <p id="data_privacy_statement_text3">Bei jedem Zugriff auf Inhalte des Internetangebotes werden dort vorübergehend
+        Daten über sogenannte Protokoll- oder Log-Dateien gespeichert, die möglicherweise eine Identifizierung zulassen.
+        Die folgenden Daten werden hierbei erhoben:</p>
+      <ul>
+        <li id="data_privacy_statement_li1">Datum und Uhrzeit des Abrufs</li>
+        <li id="data_privacy_statement_li3">Name des aufgerufenen Internetdienstes, der aufgerufenen Ressource und der
+          verwendeten Aktion</li>
+        <li id="data_privacy_statement_li4">Abfrage, die der Client gestellt hat</li>
+        <li id="data_privacy_statement_li5">übertragene Datenmenge</li>
+        <li id="data_privacy_statement_li6">IP-Adresse des aufrufenden Rechners</li>
+        <li id="data_privacy_statement_li7">Clientinformationen (u.a. Browser, Betriebssystem)</li>
+      </ul>
+      <h4 id="data_privacy_statement_text4">Auf welcher Rechtsgrundlage werden diese Daten verarbeitet?</h4>
+      <p id="data_privacy_statement_text5">Rechtsgrundlage für die vorübergehende Speicherung der Daten ist Art. 6 Abs.
+        1 lit. e DS-GVO i.V.m. § 3 Abs. 1 NRWDSAnpUG-EU.</p>
+      <h4 id="data_privacy_statement_text6">Zu welchen Zwecken erfolgt die Verarbeitung?</h4>
+      <p id="data_privacy_statement_text7">Die Daten aus den Protokoll- bzw. Logdateien dienen zur Sicherstellung der
+        Funktionsfähigkeit der Website. Zudem dienen sie zur Abwehr und Analyse von Angriffen. In diesen Zwecken liegt
+        auch unser berechtigtes Interesse an der Datenverarbeitung.</p>
+      <h4 id="data_privacy_statement_text8">Wie lange werden die Daten gespeichert?</h4>
+      <p id="data_privacy_statement_text9">Die Daten werden bis zu einer Woche direkt und ausschließlich für
+        Administratoren zugänglich aufbewahrt. Mit dem Hoster des Serverswurde ein entsprechender Vertrag zur
+        Auftragsverarbeitung (AVV) geschlossen. Es handelt sich um einen deutschen Serverstandort</p>
+      <h4 id="data_privacy_statement_text10">Karten</h4>
+      <p id="data_privacy_statement_text11">Die hier gezeigten Hintergrundkarten kommen von:</p>
+      <a class="blackdiv" href="https://www.openstreetmap.org">www.openstreetmap.org</a>
+      <h4 id="data_privacy_statement_text12">Icons</h4>
+      <p id="data_privacy_statement_text14">Die Werkzeug Icons wurden erstellt von: <a class="blackdiv"
+          href="https://www.svgrepo.com/">SVG Repo</a></p>
+      <p id="data_privacy_statement_text15">Das Weltkugel Loading Icon wurde erstellt von: <a class="blackdiv"
+          href="https://loading.io"> loading.io</a> Bitte die Lizenzbedingungen beachten</p>
+    </div>
+    <div id="legalFooter" class="modal_footer">Denkmal 4D Köln</div>
+  </div>
+  <div id="story" class="modal3">
+    <div id="storyHeader" class="modal_header">
+      <div id="storyText" class="modal_headerText">"Erfolgs"geschichten</div>
+      <img id="closestory" class="closeInfo" src="images/close.svg" alt="close" width="30" height="30">
+    </div>
+    <div id="selectstory" class="modal_content">
+      <h2 id="story_headline">"Erfolgs"geschichten</h2>
+      <h3>3D Modelle - inzwischen ganz einfach</h3>
+      <p>War früher die Erstellung von 3D Modellen Expert*innen vorbehalten, lassen sich heute 3D Modelle mittels
+        Smartphone Apps recht einfach erstellen.</p>
+      <p>Im Jahr 2018 wurde das <a class="blackdiv" href="https://3dmr.eu/">3D Model Repository</a> gestartet.
+        Hier können 3D Modelle hochgeladen werden, als Alternative zu kommerziellen Anbietern. Diese können dann
+        in Webanwendungen wie <a class="blackdiv" href="https://osmgo.org/">osmgo.org</a> angezeigt werden.
+      </p>
+      <p> Nach einem starken Start im Jahr 2018 mit insgesamt 22 hochgeladenen Modellen tat sich erst einmal nichts
+        mehr.
+        Erst ab dem Jahr 2022 werden wieder vermehrt Modelle eingepflegt. Ein guter Teil stammt aus diesem Projekt.
+      </p>
+      <h3>Warum heißt der Märchenbrunnen in Köln Mülheim eigentlich so?</h3>
+      <p></p>
+
+
+    </div>
+    <div id="storyFooter" class="modal_footer">Denkmal 4D Köln</div>
+  </div>
+  <div id="create" class="modal3">
+    <div id="createHeader" class="modal_header">
+      <div id="createText" class="modal_headerText">Denkmal anlegen</div>
+      <img id="closeCreate" class="closeInfo" src="images/close.svg" alt="close" width="30" height="30">
+    </div>
+    <div id="selectcreate" class="modal_content">
+      <h2 id="create_headline">Denkmal anlegen</h2>
+      <br />
+
+      <p>
+        <label for="create_bezeichnung">Bezeichnung:</label>
+        <input type="text" id="create_bezeichnung" name="create_bezeichnung" maxlength="400"><br />
+      </p>
+
+      <p>
+        <label for="create_modelUrl">URL des 3D Models:</label>
+        <input type="text" id="create_modelUrl" name="create_modelUrl" maxlength="400"><br />
+      </p>
+      <p>
+        <label for="create_fotoUrl">URL Foto:</label>
+        <input type="text" id="create_fotoUrl" name="create_fotoUrl" maxlength="400"><br />
+      </p>
+      <p><strong>Bitte nur Fotos unter freien Lizenzen hier verlinken!</strong></p>
+      <p>
+        <label for="create_wikiUrl">URL Wikipedia:</label>
+        <input type="text" id="create_wikiUrl" name="create_wikiUrl" maxlength="400"><br />
+      </p>
+      <p>
+        <label for="create_osm">Die Daten wurden auch bereits in OpenStreetMap eingepflegt</label>
+        <input type="checkbox" id="create_osm" name="create_osm"><br />
+      </p>
+
+      <p>
+        <input type="checkbox" id="license" name="license">
+        <label for="license">Dat muss! Mir ist bewußt, das dieser Datensatz unter der <a class="blackdiv"
+            target="_blank" href="https://www.govdata.de/dl-de/zero-2-0">Data licence Germany - Zero - Version 2.0
+            (dl-de/zero-2-0)</a>
+          veröffentlicht wird.</label><br />
+      </p>
+      <p>
+        <button id="createDenkmal">Denkmal anlegen</button> <button id="resetCreateDenkmal">Alles
+          zurücksetzen</button>
+      </p>
+
+      <details>
+        <summary>Weitere Daten pflegen</summary>
+
+        <p>
+          <label for="create_strasse">Straße:</label>
+          <input type="text" id="create_strasse" name="create_strasse" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_strasse">Hausnummer:</label>
+          <input type="text" id="create_hausnummer" name="create_hausnummer" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_strasse">PLZ:</label>
+          <input type="text" id="create_plz" name="create_plz" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_stadtbezirk">Stadtbezirk:</label>
+          <input type="text" id="create_stadtbezirk" name="create_stadtbezirk" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_baujahr">Baujahr:</label>
+          <input type="text" id="create_baujahr" name="create_baujahr" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_unterschutz">Geschützt seit:</label>
+          <input type="date" id="create_unterschutz" name="create_unterschutz" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_eigentum">Eigentum:</label>
+          <input type="text" id="create_eigentum" name="create_eigentum" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_denkmalliste">Denkmallisten Nummer:</label>
+          <input type="text" id="create_denkmalliste" name="create_denkmalliste" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_architektur">Architektur:</label>
+          <input type="text" id="create_architektur" name="create_architektur" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="create_kategorie">Kategorie:</label>
+          <select name="create_kategorie" id="create_kategorie">
+            <option disabled selected value> -- Kategorie auswählen -- </option>
+            <option value="Brunnen">Brunnen</option>
+            <option value="Brunnen, Park, Platzgestaltung, Grünanlage">Brunnen, Park, Platzgestaltung, Grünanlage
+            </option>
+            <option value="Friedhöfe, Grabstätten">Friedhöfe, Grabstätten</option>
+            <option value="Gedenkstein, Ehrenmal, Skulpturen">Gedenkstein, Ehrenmal, Skulpturen</option>
+            <option value="Grenz- u. Meilenstein">Grenz- u. Meilenstein</option>
+            <option value="Hofanlagen, Herrenhäuser, Mühlen etc.">Hofanlagen, Herrenhäuser, Mühlen etc.</option>
+            <option value="Kapellen, Heiligenhäuschen">Kapellen, Heiligenhäuschen</option>
+            <option value="Kaserne">Kaserne</option>
+            <option value="Kirchen">Kirchen</option>
+            <option value="Kleindenkmäler, Skulpturen">Kleindenkmäler, Skulpturen</option>
+            <option value="Park, Platzgestaltung, Grünanlage">Park, Platzgestaltung, Grünanlage</option>
+            <option value="Pfarrgebäude">Pfarrgebäude</option>
+            <option value="Pumpen">Pumpen</option>
+            <option value="Sonstige andere">Sonstige andere</option>
+            <option value="soziokulturelle Einrichtungen">soziokulturelle Einrichtungen</option>
+            <option value="Stadtmauer, Befestigungen">Stadtmauer, Befestigungen</option>
+            <option value="Technisches Denkmal">Technisches Denkmal</option>
+            <option value="Verkehrsbauten">Verkehrsbauten</option>
+            <option value="Verwaltungsgebäude">Verwaltungsgebäude</option>
+            <option value="Wohnhäuser">Wohnhäuser</option>
+          </select>
+        </p>
+        <!--
+      <p>
+        <label for="create_architektur">Architektur von:</label>
+        <input type="text" id="create_architektur" name="create_architektur" maxlength="400"><br />
+      </p>
+      <p>
+        <label for="create_amtsblatt">Amtsblatt:</label>
+        <input type="text" id="create_amtsblatt" name="create_amtsblatt" maxlength="400"><br />
+      </p>
+    -->
+        <!--
+      <p>
+        <label for="create_bemerkung">Bemerkung:</label>
+        <input type="text" id="create_bemerkung" name="create_bemerkung" maxlength="400"><br />
+      </p>
+    -->
+
+
+      </details>
+
+
+
+
+    </div>
+    <div id="createFooter" class="modal_footer">Denkmal 4D Köln</div>
+  </div>
+  <div id="createNonModal">
+    Bitte in die Karte klicken um ein Denkmal zu setzen. Durch erneutes Klicken kann die Position angepasst werden.
+    <p>Länge:<span id="coordinates_create_x"></span> <br />
+      Breite:<span id="coordinates_create_y"></span>
+    </p>
+    <button id="createReady">Weiter</button>
+  </div>
+  <div id="editNonModal">
+    Bitte auf ein Denkmal in die Karte klicken um dieses zu Editieren.
+  </div>
+  <div id="deleteNonModal">
+    Bitte auf ein Denkmal in die Karte klicken um dieses zu Löschen.
+  </div>
+  <div id="edit" class="modal3">
+    <div id="editHeader" class="modal_header">
+      <div id="editText" class="modal_headerText">Denkmal editieren</div>
+      <img id="closeEdit" class="closeInfo" src="images/close.svg" alt="close" width="30" height="30">
+    </div>
+    <div id="selectedit" class="modal_content">
+      <h2 id="edit_headline">Denkmal editieren</h2>
+
+      <p>
+        <label for="edit_bezeichnung">Bezeichnung:</label>
+        <input type="text" id="edit_bezeichnung" name="edit_bezeichnung" maxlength="800"><br />
+      </p>
+      <p>
+        <label for="edit_modelUrl">URL des 3D Models:</label>
+        <input type="text" id="edit_modelUrl" name="edit_modelUrl" maxlength="800">
+        <!-- wozu ??? -->
+        <!--  <span id="modelurlEditSpan"></span> -->
+        <br />
+      </p>
+      <p>
+        <label for="edit_fotoUrl">URL Foto:</label>
+        <input type="text" id="edit_fotoUrl" name="edit_fotoUrl" maxlength="800"><br />
+      </p>
+      <p><strong>Bitte nur Fotos unter freien Lizenzen hier verlinken!</strong></p>
+      <p>
+        <label for="">URL Wikipedia:</label>
+        <input type="text" id="edit_wikiUrl" name="edit_wikiUrl" maxlength="800"><br />
+      </p>
+
+      <p>
+        <label for="edit_model_care">Um die Erstellung eines 3D Modells wird sich gerade gekümmert</label>
+        <input type="checkbox" id="edit_model_care" name="edit_model_care"><br />
+      </p>
+
+      <p>
+        <label for="edit_osm">Die Daten in OpenStreetMap eingepflegt</label>
+        <input type="checkbox" id="edit_osm" name="edit_osm"><br />
+      </p>
+
+      <p>
+        <input type="checkbox" id="licenseEdit" name="license">
+        <label for="licenseEdit">Mir ist bewußt, das dieser Datensatz unter der <a class="blackdiv" target="_blank"
+            href="https://www.govdata.de/dl-de/zero-2-0">Data
+            licence Germany - Zero - Version 2.0 (dl-de/zero-2-0)</a> veröffentlicht wird.</label><br />
+      </p>
+      <p>
+        <button id="editDenkmal">Daten schreiben</button>
+      </p>
+
+      <details>
+        <summary>Weitere Daten pflegen</summary>
+
+        <p>
+          <label for="edit_strasse">Straße:</label>
+          <input type="text" id="edit_strasse" name="edit_strasse" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_strasse">Hausnummer:</label>
+          <input type="text" id="edit_hausnummer" name="edit_hausnummer" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_strasse">PLZ:</label>
+          <input type="text" id="edit_plz" name="edit_plz" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_stadtbezirk">Stadtbezirk:</label>
+          <input type="text" id="edit_stadtbezirk" name="edit_stadtbezirk" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_baujahr">Baujahr:</label>
+          <input type="text" id="edit_baujahr" name="edit_baujahr" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_unterschutz">Geschützt seit:</label>
+          <input type="date" id="edit_unterschutz" name="edit_unterschutz" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_eigentum">Eigentum:</label>
+          <input type="text" id="edit_eigentum" name="edit_eigentum" maxlength="400"><br />
+        </p>
+        <p>
+          <label for="edit_denkmalliste">Denkmallisten Nummer:</label>
+          <input type="text" id="edit_denkmalliste" name="edit_denkmalliste" maxlength="400"><br />
+        </p>
+
+        <p>
+          <label for="edit_architektur">Architektur:</label>
+          <input type="text" id="edit_architektur" name="edit_architektur" maxlength="400"><br />
+        </p>
+
+        <label for="edit_kategorie">Kategorie:</label>
+        <select name="edit_kategorie" id="edit_kategorie">
+          <option disabled selected value> -- Kategorie auswählen -- </option>
+          <option value="Brunnen">Brunnen</option>
+          <option value="Brunnen, Park, Platzgestaltung, Grünanlage">Brunnen, Park, Platzgestaltung, Grünanlage
+          </option>
+          <option value="Friedhöfe, Grabstätten">Friedhöfe, Grabstätten</option>
+          <option value="Gedenkstein, Ehrenmal, Skulpturen">Gedenkstein, Ehrenmal, Skulpturen</option>
+          <option value="Grenz- u. Meilenstein">Grenz- u. Meilenstein</option>
+          <option value="Hofanlagen, Herrenhäuser, Mühlen etc.">Hofanlagen, Herrenhäuser, Mühlen etc.</option>
+          <option value="Kapellen, Heiligenhäuschen">Kapellen, Heiligenhäuschen</option>
+          <option value="Kaserne">Kaserne</option>
+          <option value="Kirchen">Kirchen</option>
+          <option value="Kleindenkmäler, Skulpturen">Kleindenkmäler, Skulpturen</option>
+          <option value="Park, Platzgestaltung, Grünanlage">Park, Platzgestaltung, Grünanlage</option>
+          <option value="Pfarrgebäude">Pfarrgebäude</option>
+          <option value="Pumpen">Pumpen</option>
+          <option value="Sonstige andere">Sonstige andere</option>
+          <option value="soziokulturelle Einrichtungen">soziokulturelle Einrichtungen</option>
+          <option value="Stadtmauer, Befestigungen">Stadtmauer, Befestigungen</option>
+          <option value="Technisches Denkmal">Technisches Denkmal</option>
+          <option value="Verkehrsbauten">Verkehrsbauten</option>
+          <option value="Verwaltungsgebäude">Verwaltungsgebäude</option>
+          <option value="Wohnhäuser">Wohnhäuser</option>
+        </select>
+
+        <!--
+      <p>
+        <label for="create_architektur">Architektur von:</label>
+        <input type="text" id="create_architektur" name="create_architektur" maxlength="400"><br />
+      </p>
+      <p>
+        <label for="create_amtsblatt">Amtsblatt:</label>
+        <input type="text" id="create_amtsblatt" name="create_amtsblatt" maxlength="400"><br />
+      </p>
+    -->
+        <!--
+      <p>
+        <label for="create_bemerkung">Bemerkung:</label>
+        <input type="text" id="create_bemerkung" name="create_bemerkung" maxlength="400"><br />
+      </p>
+    -->
+
+
+      </details>
+    </div>
+    <div id="editFooter" class="modal_footer">Denkmal 4D Köln</div>
+  </div>
+
+  <!--
+  <div id="deleteNonModal">
+    Bitte auf ein Denkmal in die Karte klicken um dieses zu Löschen.
+  </div>
+-->
+
+  <div id="delete" class="modal3">
+    <div id="deleteHeader" class="modal_header">
+      <div id="deleteText" class="modal_headerText">Denkmal löschen</div>
+      <img id="closeDelete" class="closeInfo" src="images/close.svg" alt="close" width="30" height="30">
+    </div>
+    <div id="selectdelete" class="modal_content">
+      <h2 id="delete_headline">Denkmal löschen</h2>
+      <input type="checkbox" id="checkDelete" name="checkDelete">
+      Ja, ich möchte dieses Denkmal löschen.
+      <p>
+        <button id="deleteDenkmal">Denkmal löschen</button>
+      </p>
+    </div>
+    <div id="deleteFooter" class="modal_footer">Denkmal 4D Köln</div>
+  </div>
+  <img class="loader" id="loader" src="images/loader.gif" title="Loader (c) loading.io" alt="Loader (c) loading.io">
+  <script type="module" src="./main.js"></script>
+  <script>
+    function zurAnleitung() {
+      document.getElementById("help").style.display = "block";
+      document.getElementById("head").style.pointerEvents = "none";
+      document.getElementById("head").style.opacity = "50%";
+      document.getElementById("map").style.pointerEvents = "none";
+      document.getElementById("map").style.opacity = "50%";
+      document.getElementById("hilfe_model").scrollIntoView();
+    }
+
+  </script>
+
+</body>
+
+</html>
