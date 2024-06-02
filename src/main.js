@@ -69,6 +69,44 @@ closer.onclick = function () {
   return false;
 };
 
+// Custom Control Toggle Tools
+class SwitchControl extends Control {
+  /**
+   * @param {Object} [opt_options] Control options.
+   */
+  constructor(opt_options) {
+    const options = opt_options || {};
+
+    var switchDiv = document.createElement("div");
+    switchDiv.style.cssText =
+      "position:absolute;top:0px;left:1px; width:30px; height:30px;";
+    switchDiv.className = "switchDiv";
+    switchDiv.id = "switchDiv";
+
+    super({
+      element: switchDiv,
+      target: options.target,
+    });
+
+    switchDiv.addEventListener(
+      "click",
+      this.handleSwitchDivChange.bind(this),
+      false
+    );
+
+  }
+  handleSwitchDivChange() {
+    var selfDiv = document.getElementById("switchDiv");
+    var controlEle = document.getElementById("controlEle");
+    if (controlEle.style.display === "none") {
+      controlEle.style.display = "block";
+      selfDiv.className = "switchDiv";
+    } else {
+      controlEle.style.display = "none";
+      selfDiv.className = "switchDivHide";
+    }
+  }
+}
 
 // Custom Control Selector Tools
 class SelectorControl extends Control {
@@ -389,7 +427,7 @@ wmsLayerSource = new ImageWMS({
   },
   serverType: "geoserver",
   crossOrigin: "anonymous",
-  attributions: ', <a target="_blank" href="https://www.offenedaten-koeln.de/dataset/denkmalliste-stadt-koeln">Stadt Köln DL-DE-Zero-2.0</a>',
+  attributions: ', <a target="_blank" href="https://www.offenedaten-koeln.de/dataset/denkmalliste-stadt-koeln">Stadt Köln & Denkmal 4D Contributors DL-DE-Zero-2.0</a>',
 });
 
 
@@ -488,6 +526,7 @@ var map = new Map({
     new EditControl(),
     new DeleteControl(),
     new LayerSwitchControl(),
+    new SwitchControl(),
     new LocationControl(),
     new SelectorControl()
   ]),
@@ -577,7 +616,7 @@ map.on("singleclick", function (evt) {
           anchorYUnits: 'pixels',
           size: [48, 48],
           opacity: 1,
-          src: 'icon.png'
+          src: 'images/icon.png'
         }))
       });
 

@@ -15,8 +15,11 @@
   <meta name="keywords" content="3D, Satdtmodell, Denkmäler, Köln, Open Data, OpenLayers">
   <meta name="author" content="contact@opendemdata.info">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <!-- No Google yet-->
-  <meta name="robots" content="noindex" />
+  <!-- <meta name="robots" content="noindex" /> -->
   <title>Denkmal 4D Köln</title>
   <style>
     html,
@@ -100,7 +103,7 @@
     }
 
     .noiseselect {
-      .position: absolute;
+      position: absolute;
       top: 10px;
       width: 250px;
       height: 200px;
@@ -122,10 +125,12 @@
 
     .switchDiv {
       background: url("images/show.svg");
+      z-index: 9999;
     }
 
     .switchDivHide {
       background: url("images/hide.svg");
+      z-index: 9999;
     }
 
     .LayerSwitchDiv {
@@ -380,6 +385,65 @@
       margin-left: 10px;
     }
   </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Dataset",
+    "name": "Daten der Denkmäler der Stadt Köln",
+    "description": "Daten der Denkmäler der Stadt Köln aus der offiziellen Denkmalliste, angereichert und ergänzt von der Community.  Der besondere Fokus liegt auf der Verlinkung von exisitierenden 3D Modellen und der Erfassung geplanter Modelle.",
+    "keywords": [
+        "Denkmäler",
+        "Denkmal",
+        "3D Modelle"
+    ],
+    "creator": {
+      "@type": "Organization",
+      "name": "OK Lab Köln",
+      "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "technical support",
+          "name": "OK Lab Köln",
+          "email": "contact@opendemdata.info"
+      }
+  },
+    "publisher": {
+        "name": "OK Lab Köln",
+        "@type": "Organization",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "technical support",
+            "name": "OK Lab Köln",
+            "email": "contact@opendemdata.info"
+        }
+    },
+    "url": "https://codeforcologne.github.io/Denkmal-4D-Koeln/",
+    "license": {
+        "@type": "CreativeWork",
+        "name": "Datenlizenz Deutschland - Zero - Version 2.0",
+        "url": "https://www.govdata.de/dl-de/zero-2-0"
+    },
+    "spatialCoverage": {
+        "@type": "Place",
+        "geo": {
+            "@type": "GeoShape",
+            "box": "50.830449 6.772530 51.084962 7.162027"
+        }
+    },
+    "includedInDataCatalog": {
+        "@type": "DataCatalog",
+        "url": "https://codeforcologne.github.io/Denkmal-4D-Koeln/"
+    },
+    "distribution": [
+        {
+            "@type": "DataDownload",
+            "name": "Daten der Denkmäler der Stadt Köln",
+            "encodingFormat": "application/zip",
+            "contentUrl": "https://opendem.info/downloads/denkmaeler.zip"
+        }
+    ]
+}
+</script>
 </head>
 
 
@@ -413,30 +477,31 @@
         <a class="blackdiv" href="#hilfe_wikipedia">Anleitung Wikipedia Artikel schreiben</a><br />
         <a class="blackdiv" href="#hilfe_osm">Anleitung Daten in OSM einpflegen</a><br />
         <a class="blackdiv" href="#oklab">Über CodeforCologne [OK-Lab Köln]</a><br />
+        <a class="blackdiv" href="#kontakt">Kontakt</a><br />
         <a class="blackdiv" href="#data_download">Daten Downkload</a><br />
       </nav>
-      <h4>Mit dieser Web Anwendung könnt Ihr Metadaten über die Denkmäler der Stadt Köln pflegen.
-        Der besondere Fokus liegt auf der Verlinkung von exisitierenden 3D Modellen und der Erfassung geplanter Modelle.
-        Ziel ist eine möglichst vollständige Erfassung aller Denkmäler als 3D Modelle. Diese sollen dann zukünftig in
+      <h4>Mit dieser Web-Anwendung könnt Ihr Metadaten über die Denkmäler der Stadt Köln pflegen.
+        Der besondere Fokus liegt auf der Verlinkung von existierenden 3D-Modellen und der Erfassung geplanter Modelle.
+        Ziel ist eine möglichst vollständige Erfassung aller Denkmäler als 3D-Modelle. Diese sollen dann zukünftig in
         der Web-3D Anwendung erkundet werden können.
       </h4>
       <p>Die zugrunde liegende <a class="blackdiv" target="_blank"
           href="https://www.offenedaten-koeln.de/dataset/denkmalliste-stadt-koeln"> Denkmalliste der Stadt Köln </a> ist
         ein freier
         Datensatz (<a class="blackdiv" target="_blank" href="https://www.govdata.de/dl-de/zero-2-0">
-          Datenlizenz Deutschland – Zero – Version 2.0</a>) der Stadt (letzte Aktualisierung 26.07.2022).<br />
-        Doch nicht alle Zeuhnisse der Geschichte stehebn unter Denkmalschutz. Der als Zeugnis der Kalker
-        Industriegeschichte aufgetsellt Turboverdichter aus der Sodaproduktion der vormaligen Chemischen Fabrik Kalk
+          Datenlizenz Deutschland - Zero - Version 2.0</a>) der Stadt (letzte Aktualisierung 26.07.2022).<br />
+        Doch nicht alle Zeugnisse der Geschichte stehen unter Denkmalschutz. Der als Zeugnis der Kalker
+        Industriegeschichte aufgestellte Turboverdichter aus der Sodaproduktion der vormaligen Chemischen Fabrik Kalk
         gehört z.B. dazu (Ecke Kalker Hauspstraße/Kaplellenstraße).
         Deswegen habt Ihr hier die Möglichkeit neue Denkmäler anzulegen, Denkmäler zu editieren und Denkmäler zu
         löschen.
       </p>
-      <p>Deine Arbeiten stehen dann wieder Allen unter freien Lizenzen zur Verfügung.</p>
+      <p>Deine Arbeiten stehen dann wieder allen unter freien Lizenzen zur Verfügung.</p>
 
 
       <h2 id="hilfe_anker">Hilfe</h2>
       <h4>Auswahl der zu pflegenden Kategorien</h4>
-      <p>In der linken oberen Ecke der Kartenanwendung können die Kategorien ausgewählt werden die es hier zu pflegen
+      <p>In der linken oberen Ecke der Kartenanwendung können die Kategorien ausgewählt werden, die es hier zu pflegen
         gibt.</p>
       <img src="images/nav.png" alt="Auswahl der zu pflegenden Kategorien">
       <p>Der Stand der Bearbeitung ist der Legende zu entnehmen.</p>
@@ -444,18 +509,18 @@
       <h4>Objektinformationen abfragen</h4>
       <p>Durch das Anklicken oder Antippen eines Denkmales öffnet sich die Detailinformationen:</p>
       <img src="images/featureinfo.png" alt="FeatureInfo">
-      <p>Wenn noch kein 3D Model eingeflegt wurde, hast Du hier die Möglichkeit über den Button "Klar, da kümmere ich
+      <p>Wenn noch kein 3D Model eingepflegt wurde, hast Du hier die Möglichkeit über den Button "Klar, da kümmere ich
         mich drum!" das Denkmal als "in Arbeit" zu markieren. Dann wissen andere, dass für dieses Denkmal zukünftig ein
         3D Modell erstellt wird. </p>
       <img src="images/featureinfo_maintain.png" alt="FeatureInfo in Arbeit nehmen">
 
       <h4>Hintergrundkarte wechseln</h4>
-      <p>In der oberen rechten Ecke der Karte befindet isch ein Icon um zwischen der <a class="blackdiv" target="_blank"
+      <p>In der oberen rechten Ecke der Karte befindet sich ein Icon um zwischen der <a class="blackdiv" target="_blank"
           href="https://www.openstreetmap.de/">OpenStreetMap</a> Karte und dem Luftbilddienst von <a class="blackdiv"
           target="_blank"
           href="https://www.bezreg-koeln.nrw.de/brk_internet/geobasis/webdienste/geodatendienste/">Geobasis NRW</a> zu
         wechseln.
-        Die Luftbilder besitzen eine Auflösung von 10cm und sind recht aktuell (der Aufnahmezyklus wurde ab 2020 auf 2
+        Die Luftbilder besitzen eine Auflösung von 10 cm und sind recht aktuell (der Aufnahmezyklus wurde ab 2020 auf 2
         Jahre verkürzt).
       </p>
       <img src="images/layerswitcher.png" alt="Karte/Luftbild umschalten">
@@ -486,7 +551,7 @@
       <h4>Auf meinen aktuellen Standort zoomen</h4>
       <p>Mittels des Icons könnt Ihr auf Euren aktuellen Standort zoomen:</p>
       <img src="images/standort_zoom.png" alt="Auf den aktuellen Standort zoomen.">
-      <p>Oft ist es im Feld gar nicht so einfach den Überblick zu behalten. Hiermit könnt Ihr auf Euren aktuellen
+      <p>Oft ist es im Feld gar nicht so einfach, den Überblick zu behalten. Hiermit könnt Ihr auf Euren aktuellen
         Standort zoomen, sofern Ihr vorher der Anwendung dies erlaubt habt.
         Das GPS hat allerdings so seine Einschränkungen, besonders in Häuserschluchten. Erwartet daher keine exakte
         Lokalisierung.
@@ -496,7 +561,7 @@
       <h3>1. Meshroom:</h3>
       <ul>
         <li>Meshroom ist eine Open-Source-Software zur 3D-Rekonstruktion aus Fotos.</li>
-        <li>Sie verwendet Fotogrammmetrie, um aus einer Reihe von 2D-Bildern ein 3D-Modell zu erstellen.</li>
+        <li>Sie verwendet Fotogrammetrie, um aus einer Reihe von 2D-Bildern ein 3D-Modell zu erstellen.</li>
         <li><strong>Einfach zu bedienen</strong>: Die Benutzeroberfläche ist intuitiv und leicht verständlich.</li>
       </ul>
       <p><strong><i>Wie funktioniert Meshroom?</i></strong></p>
@@ -527,9 +592,8 @@
       <p><strong><i>Wie funktioniert Meshlab?</i></strong></p>
       <ul>
         <li><strong>Laden und Anzeigen von 3D-Modellen in verschiedenen Formaten</strong></li>
-        <li><strong>Reinigen und Reparieren von 3D-Modellen</strong>: Rauschen entfernen, Löcher füllen, Decimierung,
-          Normalen
-          berechnen</li>
+        <li><strong>Reinigen und Reparieren von 3D-Modellen</strong>: Rauschen entfernen, Löcher füllen, Dezimierung,
+          Normalen berechnen</li>
         <li><strong>Bearbeiten von 3D-Modellen</strong>: Skalieren, Drehen, Verschieben, Verformen, Punkte
           hinzufügen/entfernen,
           Polygonnetze erstellen</li>
@@ -538,8 +602,7 @@
         <li><strong> Konvertierung von 3D-Modellen zwischen verschiedenen Dateiformaten</strong></li>
       </ul>
       <p><strong>Installation</strong>: <a class="blackdiv" target="_blank"
-          href="https://www.meshlab.net/#download">https://www.meshlab.net/#download</a>, oder ein Ticket für StadtPC
-        erstellen (für AZ-Mitarbeiter ist die Nutzung der städtischen Rechner erlaubt).<br />
+          href="https://www.meshlab.net/#download">https://www.meshlab.net/#download</a><br />
         <strong>Video-Tutorial</strong>: <a class="blackdiv" target="_blank"
           href="https://www.youtube.com/user/mrpmeshlabtutorials">https://www.youtube.com/user/mrpmeshlabtutorials</a>
       </p>
@@ -547,6 +610,8 @@
       <ul>
         <li>Reality Capture</li>
         <li>Colab</li>
+        <li>Reality Capture (https://www.capturingreality.com/)</li>
+        <li>Colmap (https://colmap.github.io/)</li>
         <li>Luma AI</li>
         <li>Polycam</li>
       </ul>
@@ -610,11 +675,13 @@
 
       <h2 id="oklab">Über CodeforCologne [OK-Lab Köln]</h2>
       <p>CodeForCologne oder OK Lab Köln ist eine regionale Gruppe von Designern, Entwicklerinnen, Journalisten und
-        Anderen, die sich regelmäßig treffen, um an nützlichen Anwendungen rund um Offene Daten zu arbeiten. Unser
+        Anderen, die sich regelmäßig treffen, um an nützlichen Anwendungen rund um offene Daten zu arbeiten. Unser
         Treffen findet alle zwei Wochen statt. Schaut einfach in unserer <a class="blackdiv" target="_blank"
           href="https://www.meetup.com/de-DE/codeforcologne/">Meetup Gruppe</a> vorbei!</p>
       <a class="blackdiv" target="_blank" href="https://codefor.de/koeln/"><img src="images/oklab_koelle.png"
           alt="CodeforCologne"></a>
+      <h2 id="kontakt">Kontakt</h2>
+      <p>Martin: contact (at) opendemdata.info</p>
       <h2 id="data_download">Daten Download</h2>
       <p>Die Daten werden täglich um 6:10 aufbereitet, und stehen als gezipptes Geojson zur Verfügung.</p>
       Lizenzbedingungen:
@@ -657,38 +724,117 @@
       <h4 id="legal_author">Urheberrecht</h4>
       <p id="legal_author_text">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen
         dem deutschen Urheberrecht. Sie sind mit einer Creative Commons Lizenz urheberrechtlich geschützt. Sofern nicht
-        anders angegeben, stehen die Inhalte dieser Seite unter der Creative Commons Namensnennung 3.0 DE Lizenz. Soweit
+        anders angegeben, stehen die Inhalte dieser Seite unter der Creative Commons Zero DE Lizenz. Soweit
         die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet.
         Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine
         Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von
         Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.</p>
       <h3 id="data_privacy_statement">Datenschutzerklärung</h3>
-      <h4 id="data_privacy_statement_text1">Bereitstellung der Website und Erstellung von Protokoll- oder Log-Dateien
-      </h4>
-      <h4 id="data_privacy_statement_text2">Welche Daten werden verarbeitet?</h4>
-      <p id="data_privacy_statement_text3">Bei jedem Zugriff auf Inhalte des Internetangebotes werden dort vorübergehend
-        Daten über sogenannte Protokoll- oder Log-Dateien gespeichert, die möglicherweise eine Identifizierung zulassen.
-        Die folgenden Daten werden hierbei erhoben:</p>
-      <ul>
-        <li id="data_privacy_statement_li1">Datum und Uhrzeit des Abrufs</li>
-        <li id="data_privacy_statement_li3">Name des aufgerufenen Internetdienstes, der aufgerufenen Ressource und der
-          verwendeten Aktion</li>
-        <li id="data_privacy_statement_li4">Abfrage, die der Client gestellt hat</li>
-        <li id="data_privacy_statement_li5">übertragene Datenmenge</li>
-        <li id="data_privacy_statement_li6">IP-Adresse des aufrufenden Rechners</li>
-        <li id="data_privacy_statement_li7">Clientinformationen (u.a. Browser, Betriebssystem)</li>
-      </ul>
-      <h4 id="data_privacy_statement_text4">Auf welcher Rechtsgrundlage werden diese Daten verarbeitet?</h4>
-      <p id="data_privacy_statement_text5">Rechtsgrundlage für die vorübergehende Speicherung der Daten ist Art. 6 Abs.
-        1 lit. e DS-GVO i.V.m. § 3 Abs. 1 NRWDSAnpUG-EU.</p>
-      <h4 id="data_privacy_statement_text6">Zu welchen Zwecken erfolgt die Verarbeitung?</h4>
-      <p id="data_privacy_statement_text7">Die Daten aus den Protokoll- bzw. Logdateien dienen zur Sicherstellung der
-        Funktionsfähigkeit der Website. Zudem dienen sie zur Abwehr und Analyse von Angriffen. In diesen Zwecken liegt
-        auch unser berechtigtes Interesse an der Datenverarbeitung.</p>
-      <h4 id="data_privacy_statement_text8">Wie lange werden die Daten gespeichert?</h4>
-      <p id="data_privacy_statement_text9">Die Daten werden bis zu einer Woche direkt und ausschließlich für
-        Administratoren zugänglich aufbewahrt. Mit dem Hoster des Serverswurde ein entsprechender Vertrag zur
-        Auftragsverarbeitung (AVV) geschlossen. Es handelt sich um einen deutschen Serverstandort</p>
+      <h3>Hosting</h3>
+      <p>
+        Unser Hoster erhebt in sog. Logfiles folgende Daten, die Ihr
+        Browser übermittelt:
+      </p>
+      <li>
+        IP-Adresse, die Adresse der vorher besuchten Website
+        (Referer Anfrage-Header)
+      </li>
+      <li>Datum und Uhrzeit der Anfrage</li>
+      <li>Zeitzonendifferenz zur Greenwich Mean Time</li>
+      <li>Inhalt der Anforderung</li>
+      <li>HTTP-Statuscode</li>
+      <li>übertragene Datenmenge</li>
+      <li>Website, von der die Anforderung kommt</li>
+      <li>Informationen zu Browser und Betriebssystem</li>
+      <p>
+        Das ist erforderlich, um unsere Website anzuzeigen und die
+        Stabilität und Sicherheit zu gewährleisten. Dies entspricht
+        unserem berechtigten Interesse im Sinne des Art. 6 Abs. 1 S.
+        1 lit. f DSGVO.
+      </p>
+      <p>
+        Es erfolgt kein Tracking und wir haben auf diese Daten
+        keinen direkten Zugriff, sondern erhalten lediglich eine
+        anonymisierte, statistische Zusammenfassung. Diese
+        beinhaltet die Adresse der vorher besuchten Seite, die
+        Häufigkeit der jeweils aufgerufenen Seiten und die Anzahl
+        eindeutiger Besucher. Diese Daten führen wir nicht mit
+        anderen Daten zusammen.
+      </p>
+      <p>
+        Wir setzen für die Zurverfügungstellung unserer Website
+        folgenden Hoster ein:
+      </p>
+      <p>
+        GitHub Inc.<br />
+        88 Colin P Kelly Jr St<br />
+        San Francisco, CA 94107<br />
+        United States
+      </p>
+      <p>
+        Dieser ist Empfänger Ihrer personenbezogenen Daten. Dies
+        entspricht unserem berechtigten Interesse im Sinne des Art.
+        6 Abs. 1 S. 1 lit. f DSGVO, selbst keinen Server in unseren
+        Räumlichkeiten vorhalten zu müssen. Serverstandort ist USA.
+      </p>
+      <p>
+        Weitere Informationen zu Widerspruchs- und
+        Beseitigungsmöglichkeiten gegenüber GitHub finden Sie unter:
+      </p>
+      <a class="blackdiv" target="_blank"
+        href="https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages">https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages</a>
+
+      <p>Sie haben das Recht der Verarbeitung zu widersprechen.</p>
+      <p>
+        Ob der Widerspruch erfolgreich ist, ist im Rahmen einer
+        Interessenabwägung zu ermitteln.
+      </p>
+      <p>
+        Die Daten werden gelöscht, sobald der Zweck der Verarbeitung
+        entfällt.
+      </p>
+      <p>
+        Die Verarbeitung der unter diesem Abschnitt angegebenen
+        Daten ist weder gesetzlich noch vertraglich vorgeschrieben.
+        Die Funktionsfähigkeit der Website ist ohne die Verarbeitung
+        nicht gewährleistet.
+      </p>
+      <p>
+        GitHub hat Compliance-Maßnahmen für internationale
+        Datenübermittlungen umgesetzt. Diese gelten für alle
+        weltweiten Aktivitäten, bei denen GitHub personenbezogene
+        Daten von natürlichen Personen in der EU verarbeitet. Diese
+        Maßnahmen basieren auf den EU-Standardvertragsklauseln
+        (SCCs). Weitere Informationen finden Sie unter:
+      </p>
+      <a class="blackdiv" target="_blank"
+        href="https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-data-protection-addendum#attachment-1–the-standard-contractual-clauses-processors">https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-data-protection-addendum#attachment-1–the-standard-contractual-clauses-processors</a>
+
+      <h3>Rechtliche Hinweise</h3>
+      <p>
+        Grundsätzlich ist ein Auftragsverarbeitungsvertrag mit dem
+        Hoster abzuschließen. Das bayerische Landesamt für
+        Datenschutzaufsicht hat für das Hosting rein statischer
+        Websites eine Ausnahme gemacht. Für den Fall, dass die
+        Webseite der Selbstdarstellung dient, z.B. von Vereinen oder
+        Kleinunternehmen, keine personenbezogenen Daten an den
+        Betreiber fließen und kein Tracking stattfindet, liegt keine
+        Auftragsverarbeitung vor. Weiter heißt es: „Die Tatsache,
+        dass auch beim Hosting von statischen Webseiten zwangsläufig
+        IP-Adressen, d.h. personenbezogene Daten, verarbeitet werden
+        müssen, führt nicht zur Annahme einer Auftragsverarbeitung.
+        Das wäre nicht sachgerecht. Die (kurzfristige)
+        IP-Adressenspeicherung ist vielmehr noch der
+        TK-Zugangsvermittlung des Website-Hosters nach dem TKG
+        zuzurechnen und dient in erster Linie Sicherheitszwecken des
+        Hosters.“<br />
+        (<a class="blackdiv" target="_blank"
+          href="https://www.lda.bayern.de/media/veroeffentlichungen/FAQ_Hosting_keine_Auftragsverarbeitung.pdf">https://www.lda.bayern.de/media/veroeffentlichungen/FAQ_Hosting_keine_Auftragsverarbeitung.pdf</a>)
+      </p>
+      <p>
+        Wir gehen davon aus, dass diese Ausnahme auf GitHub Pages
+        anzuwenden ist.
+      </p>
       <h4 id="data_privacy_statement_text10">Karten</h4>
       <p id="data_privacy_statement_text11">Die hier gezeigten Hintergrundkarten kommen von:</p>
       <a class="blackdiv" href="https://www.openstreetmap.org">www.openstreetmap.org</a>
@@ -696,7 +842,7 @@
       <p id="data_privacy_statement_text14">Die Werkzeug Icons wurden erstellt von: <a class="blackdiv"
           href="https://www.svgrepo.com/">SVG Repo</a></p>
       <p id="data_privacy_statement_text15">Das Weltkugel Loading Icon wurde erstellt von: <a class="blackdiv"
-          href="https://loading.io"> loading.io</a> Bitte die Lizenzbedingungen beachten</p>
+          href="https://loading.io"> loading.io</a><br /> Bitte die Lizenzbedingungen beachten</p>
     </div>
     <div id="legalFooter" class="modal_footer">Denkmal 4D Köln</div>
   </div>
@@ -707,7 +853,14 @@
     </div>
     <div id="selectstory" class="modal_content">
       <h2 id="story_headline">"Erfolgs"geschichten</h2>
-      <h3>3D Modelle - inzwischen ganz einfach</h3>
+      <p> Kleine Geschichten, rund um das Projekt.</p>
+      <a class="blackdiv" href="#erstes3dmodell_anker">Mein erstes 3D Modell</a><br />
+      <a class="blackdiv" href="#3dganzeinfach_anker">3D Modelle - inzwischen ganz einfach</a><br />
+      <a class="blackdiv" href="#maerchen_anker">Warum heißt der Märchenbrunnen in Köln Mülheim eigentlich so?</a><br />
+      <hr />
+      <h3 id="erstes3dmodell_anker">Mein erstes 3D Modell</h3>
+      <hr />
+      <h3 id="3dganzeinfach_anker">3D Modelle - inzwischen ganz einfach</h3>
       <p>War früher die Erstellung von 3D Modellen Expert*innen vorbehalten, lassen sich heute 3D Modelle mittels
         Smartphone Apps recht einfach erstellen.</p>
       <p>Im Jahr 2018 wurde das <a class="blackdiv" href="https://3dmr.eu/">3D Model Repository</a> gestartet.
@@ -716,10 +869,84 @@
       </p>
       <p> Nach einem starken Start im Jahr 2018 mit insgesamt 22 hochgeladenen Modellen tat sich erst einmal nichts
         mehr.
-        Erst ab dem Jahr 2022 werden wieder vermehrt Modelle eingepflegt. Ein guter Teil stammt aus diesem Projekt.
+        Erst ab dem Jahr 2022 werden wieder vermehrt Modelle eingepflegt. Ein guter Teil stammt aus diesem Projekt, und
+        ist ein mal ein gutes Beispiel dafür, wie technischer Fortschritt die Fähigkeit zum Beitragen erhöhen kann.
       </p>
-      <h3>Warum heißt der Märchenbrunnen in Köln Mülheim eigentlich so?</h3>
-      <p></p>
+      <hr />
+      <h3 id="maerchen_anker">Warum heißt der Märchenbrunnen in Köln Mülheim eigentlich so?</h3>
+
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/M%C3%A4rchenbrunnen-K%C3%B6ln-N%C3%BClheimer-Stadtgarten.JPG/636px-M%C3%A4rchenbrunnen-K%C3%B6ln-N%C3%BClheimer-Stadtgarten.JPG"
+        alt="Märchenbrunnen Köln Mülheim">
+      <p>Märchenbrunnen Köln Mülheim - <a class="blackdiv"
+          href="https://commons.wikimedia.org/wiki/File:M%C3%A4rchenbrunnen-K%C3%B6ln-N%C3%BClheimer-Stadtgarten.JPG">WikiMedia
+          Horsch,
+          Willy CC-BY-3.0</a></p>
+      <p>Weder die Gruppe balgender Kinder, noch die Tierfiguren im unteren Bassin erinnern an ein Märchen. Wieso heißt
+        der Brunnen also so, laut Denkmalliste?</p>
+      <p>Ursprünglich wurden die Tierfiguren nicht erwähnt (<a class="blackdiv"
+          href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/YJSI2IOHVVDKIMYVUDSL7OHGKJDI4B3B?tx_dlf%5bhighlight_word%5d=Brunnen&issuepage=2&zdb_id=2931778-2&query=Brunnen&hit=3">Mülheimer
+          Volkszeitung. Nr. 448, 26. Mai 1914</a>),
+        und der 1914 fertig gestellte Brunnen wurde als Kinderbrunnen
+        bezeichnet (<a class="blackdiv"
+          href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/H4Z5ED366CNDLWTEMDIYBLQM2UE67H4A?tx_dlf%5bhighlight_word%5d=Brunnen&issuepage=2&fromDay=20&toYear=1940&fromYear=1913&toDay=7&query=Brunnen&toMonth=4&fromMonth=12&place=K%C3%B6ln&sort=sort.publication_date+asc&page=9&hit=17">Mülheimer
+          Volkszeitung. Nr. 447, 26. Mai 1914</a>)
+      </p>
+      <p> Zumindest der Autor der Rheinische Zeitung war auch gar nicht so glücklich mit dem Motiv: "Ein ähnlich
+        aufgebauter Brunnen steht in Röhrsdorf. Der dortige Aufsatz, Schulmädchen mit Buch und kleinem Schwesterchen,
+        (abgebildet im 'Kunstwart'), hätte vielleicht eine bessere Wirkung ergeben". Die Kinder sollen sich schließlich
+        nicht balgen, sondern lieber brav lernen.</p>
+      <p> Damals wie heute stand der Brunnen an einer Schule, damals Königliches Gymnasium, heute Hölderlin Gymnasium.
+      </p>
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/M%C3%A4rchenbrunnen_R%C3%B6hrsdorf.jpg/576px-M%C3%A4rchenbrunnen_R%C3%B6hrsdorf.jpg"
+        alt="Märchenbrunnen Röhrsdorf">
+      <p>Märchenbrunnen Röhrsdorf - <a class="blackdiv"
+          href="https://de.wikipedia.org/wiki/Datei:M%C3%A4rchenbrunnen_R%C3%B6hrsdorf.jpg">WikiMedia
+          M.Uebel gemeinfrei</a></p>
+      <p> Der Brunnen in Röhrsdorf sieht nun wirklich mehr nach Märchen aus.</p>
+      <p> Leider habe ich in den Zeitungsarchiven der <a class="blackdiv"
+          href="https://www.deutsche-digitale-bibliothek.de/">Deutschen Digitalen
+          Bibliothek</a> keine weiteren Informationen zum Mülheimer Brunnen finden können.</p>
+      <p>
+        Die <a class="blackdiv"
+          href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/LYATD5HL66JEEJVEURASLMGV3OYAOBLQ?zdb_id=2927784-X&query=M%C3%A4rchenbrunnen&hit=1&issuepage=8">Mülheimer
+          Volkszeitung (9. August 1918)</a> schreibt vom "kleinen Brunnen spielende Kinder" am Stadtgarten, der nicht zu
+        Kriegszwecken eingeschmolzen werden muss (im Gegensatz zum Genoveva Brunnen, Jan-Wellem-Denkmal und
+        Handelsbrunnen ). Eventuell wurde das untere Becken erst später ausgebaut. Bei 10 Metern Durchmessern würde man
+        im Vergleich zum Genoveva Brunnen
+        ansonsten wohl kaum vom "kleinen Brunnen" sprechen.
+      </p>
+
+      <p>In der Zeitung <a class="blackdiv"
+          href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/LYATD5HL66JEEJVEURASLMGV3OYAOBLQ?zdb_id=2927784-X&query=M%C3%A4rchenbrunnen&hit=1&issuepage=8">Deutscher
+          Tag vom
+          29.05.1934</a> wird bereits vom Märchenbrunnen gesprochen.</p>
+      <p>Und so bleibt der Ursprung des Names leider trotz der freundlichen Unterstützung durch die <a class="blackdiv"
+          href="https://www.geschichtswerkstatt-muelheim.de/">Geschichtswerkstatt Mülheim</a> und den
+        <a class="blackdiv" href="https://rheinischer-verein.de/">Rheinischen Verein für Denkmalpflege und
+          Landschaftsschutz</a> erst einmal im Dunkeln. Wann die Tierfiguren im unteren Bassin hinzugekommen sind, war
+        ebenfalls nicht heraus zu finden.
+        Eventuell standen dort ja wirklich zunächst wirklich einmal Märchenfiguren.
+      </p>
+      <p>Die Mülheimer Volkszeitung hat leider im Juni 1919 die Erscheinung eingestellt. Schade, dies war eine ergiebige
+        Quelle.</p>
+      <p>Die beiden Brunnen haben leider auch noch eine Gemeinsamkeit, sowohl die vier Märchenfiguren des Röhrsdorfer
+        Märchenbrunnen
+        wurden gestohlen (<a class="blackdiv"
+          href="https://www.chemnitz.de/chemnitz/de/aktuell/presse/pressemitteilungen/2020/646.html">chemnitz.de,2020
+        </a>), als auch die Tierfiguren des Märchenbrunnens in Köln-Mülheim (<a class="blackdiv"
+          href="https://www.ksta.de/koeln/muelheim/muelheim-veedel/koeln-muelheim-bronzetiere-des-maerchenbrunnens-gestohlen-676780">KSTA,2023
+        </a>).
+      </p>
+      <p>Falls Du etwas über den Ursprung des Names weißt, kontaktiere uns doch bitte! </p>
+
+
+
+
+
+
+
 
 
     </div>
