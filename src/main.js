@@ -828,7 +828,6 @@ map.on("singleclick", function (evt) {
             if (fi.features[0].properties.model3d === 'nein') {
               content.innerHTML += '<p><strong>Leider noch kein 3D Modell vorhanden, erstelle doch bitte eins!<img onclick="zurAnleitung()" style="cursor: pointer;" src="images/help-svgrepo-white.svg" height="18" width="18"/></p>';
               content.innerHTML += '<button id=\"careDenkmal\"> Klar, da kümmere ich mich drum!</button></p>';
-
               document.getElementById("careDenkmal").addEventListener("click", careDenkmal);
             }
             if (fi.features[0].properties.model3d === 'work') {
@@ -836,13 +835,20 @@ map.on("singleclick", function (evt) {
             }
             if (fi.features[0].properties.model3d === 'ja') {
               content.innerHTML += '<p><a target=\"_blank\"href=\"' + fi.features[0].properties.model3durl + '\">Link zum 3d Model </a></p>';
-
             }
+
+            // close button 4 mobile
+            /*
+            if (window.matchMedia("(max-width: 700px)").matches) {
+              content.innerHTML += '<button id="popupCloserButton">✖</button>';
+              document.getElementById("popupCloserButton").addEventListener("click", closeFiViaButton);
+            }
+            */
+
 
             if (fi.features[0].properties.wiki === 'ja') {
               content.innerHTML += '<br/><a target=\"_blank\"href=\"' + fi.features[0].properties.wikiurl + '\">Link zum Wikipedia Artikel </a>';
             }
-
             overlay.setPosition(coordinate);
           }
         });
@@ -871,7 +877,9 @@ function careDenkmal() {
         var res = JSON.parse(this.response);
         if (res.request === 'done') {
           alert('Danke für´s Kümmern!\n ')
-          wmsLayerSource.refresh();
+          wmsLayerSource.updateParams({
+            'update': Math.random()
+          });
         } else {
           alert("Leider ist etwas schief gelaufen.");
         }
@@ -1157,6 +1165,13 @@ function deleteDenkmal() {
     xhttp.send();
   }
 }
+
+function closeFiViaButton() {
+  overlay.setPosition(undefined);
+  closer.blur();
+  return false;
+};
+
 
 // help
 document.getElementById("helpIcon").addEventListener("click", help);
