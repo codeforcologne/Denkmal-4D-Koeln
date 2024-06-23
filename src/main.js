@@ -40,6 +40,7 @@ var lastid;
 var lastmodel;
 var lastfoto;
 var lastwiki;
+var lastpodcast;
 var dop = false;
 var createTool = false;
 var editTool = false;
@@ -644,6 +645,7 @@ map.on("singleclick", function (evt) {
     document.getElementById('edit_bezeichnung').value = '';
     document.getElementById('edit_fotoUrl').value = '';
     document.getElementById('edit_wikiUrl').value = '';
+    document.getElementById('edit_podcastUrl').value = '';
     document.getElementById('edit_osm').checked = false;
     document.getElementById('edit_model_care').checked = false;
     document.getElementById('edit_denkmalliste').value = '';
@@ -695,8 +697,11 @@ map.on("singleclick", function (evt) {
             lastmodel = fi.features[0].properties.model3d;
             lastfoto = fi.features[0].properties.foto;
             lastwiki = fi.features[0].properties.wiki;
+            lastpodcast = fi.features[0].properties.podcast;
+
             document.getElementById('edit_fotoUrl').value = fi.features[0].properties.fotourl;
             document.getElementById('edit_wikiUrl').value = fi.features[0].properties.wikiurl;
+            document.getElementById('edit_podcastUrl').value = fi.features[0].properties.podcasturl;
             var osm = fi.features[0].properties.osm;
             if (osm === 'ja') {
               document.getElementById('edit_osm').checked = true;
@@ -849,6 +854,10 @@ map.on("singleclick", function (evt) {
             if (fi.features[0].properties.wiki === 'ja') {
               content.innerHTML += '<br/><a target=\"_blank\"href=\"' + fi.features[0].properties.wikiurl + '\">Link zum Wikipedia Artikel </a>';
             }
+
+            if (fi.features[0].properties.podcast === 'ja') {
+              content.innerHTML += '<br/><a target=\"_blank\"href=\"' + fi.features[0].properties.podcasturl + '\">Hier geht es zum Podcast </a>';
+            }
             overlay.setPosition(coordinate);
           }
         });
@@ -973,6 +982,11 @@ function createDenkmal() {
     if (wikiurl.length > 0) {
       wiki = 'ja';
     }
+    var podcasturl = document.getElementById('create_podcastUrl').value;
+    var podcast = 'nein';
+    if (podcasturl.length > 0) {
+      podcast = 'ja';
+    }
     var osm = document.getElementById('create_osm');
     if (osm.checked) {
       osm = 'ja';
@@ -983,7 +997,7 @@ function createDenkmal() {
     var url = `${pyUrl}createDenkmal.py?lat=${cord_e_3857}&lon=${cord_n_3857}&model=${model}&modelurl=${modelurl}&bezeichnung=${bezeichnung}
 &strasse=${strasse}&hausnummer=${hausnummer}&plz=${plz}&stadtbezirk=${stadtbezirk}&baujahr=${baujahr}
 &unterschutzstellung=${unterschutz}&eigentum=${eigentum}&denkmalliste=${denkmalliste}&kategorie=${kategorie}&foto=${foto}&fotourl=${fotourl}
-&wiki=${wiki}&wikiurl=${wikiurl}&osm=${osm}&architektur=${architektur}`;
+&wiki=${wiki}&wikiurl=${wikiurl}&osm=${osm}&architektur=${architektur}&podcast=${podcast}&podcasturl=${podcasturl}`;
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
@@ -1042,6 +1056,8 @@ function editDenkmal() {
 
     if (modelurlEdit.length > 0) {
       model = 'ja';
+    } else {
+      model = 'nein';
     }
 
     var foto = lastfoto;
@@ -1055,7 +1071,18 @@ function editDenkmal() {
     var wikiurlEdit = document.getElementById('edit_wikiUrl').value;
     if (wikiurlEdit.length > 0) {
       wiki = 'ja';
+    } else {
+      wiki = 'nein';
     }
+
+    var podcast = lastpodcast;
+    var podcasturlEdit = document.getElementById('edit_podcastUrl').value;
+    if (podcasturlEdit.length > 0) {
+      podcast = 'ja';
+    } else {
+      podcast = 'nein';
+    }
+
     var bezeichnungEdit = document.getElementById('edit_bezeichnung').value;
 
     var osmEdit = document.getElementById('edit_osm');
@@ -1080,7 +1107,8 @@ function editDenkmal() {
     var url = `${pyUrl}editDenkmal.py?ogc_fid=${lastid}&model=${model}&modelurl=${modelurlEdit}&bezeichnung=${bezeichnungEdit}
 &strasse=${strasseEdit}&hausnummer=${hausnummerEdit}&plz=${plzEdit}&stadtbezirk=${stadtbezirkEdit}&baujahr=${baujahrEdit}
 &unterschutzstellung=${unterschutzEdit}&eigentum=${eigentumEdit}&denkmalliste=${denkmallisteEdit}&kategorie=${kategorieEdit}&foto=${foto}
-&fotourl=${fotourlEdit}&wiki=${wiki}&wikiurl=${wikiurlEdit}&osm=${osmEdit}&aktualisierung=${aktualisierung}&architektur=${architekturEdit}`;
+&fotourl=${fotourlEdit}&wiki=${wiki}&wikiurl=${wikiurlEdit}&osm=${osmEdit}&aktualisierung=${aktualisierung}&architektur=${architekturEdit}
+&podcast=${podcast}&podcasturl=${podcasturlEdit}`;
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
