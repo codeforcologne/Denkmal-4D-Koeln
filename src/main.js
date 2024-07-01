@@ -143,10 +143,16 @@ class SelectorControl extends Control {
     radioItem4.id = "rad4";
     radioItem4.value = "myradio4";
 
+    var radioItem5 = document.createElement("input");
+    radioItem5.type = "radio";
+    radioItem5.name = "radioGrp";
+    radioItem5.id = "rad5";
+    radioItem5.value = "myradio5";
     var objTextNode1 = document.createTextNode("3D Model");
     var objTextNode2 = document.createTextNode("Foto");
     var objTextNode3 = document.createTextNode("Wikipedia");
     var objTextNode4 = document.createTextNode("OpenStreetMap");
+    var objTextNode5 = document.createTextNode("Podcast");
 
     var objLabel = document.createElement("label");
     objLabel.style.cssText = "position:absolute;top:50px;left:10px";
@@ -172,6 +178,12 @@ class SelectorControl extends Control {
     objLabel4.appendChild(radioItem4);
     objLabel4.appendChild(objTextNode4);
 
+    var objLabel5 = document.createElement("label");
+    objLabel5.style.cssText = "position:absolute;top:130px;left:10px;";
+    objLabel5.htmlFor = radioItem5.id;
+    objLabel5.appendChild(radioItem5);
+    objLabel5.appendChild(objTextNode5);
+
     var objTextNode5 = document.createElement("P");
     objTextNode5.innerHTML =
       "<strong>Was gibt es hier zu pflegen?</strong>";
@@ -179,14 +191,14 @@ class SelectorControl extends Control {
 
 
     var divLegend = document.createElement("p");
-    divLegend.style.cssText = "position:absolute;top:120px;left:5px";
+    divLegend.style.cssText = "position:absolute;top:140px;left:5px";
     divLegend.innerHTML = `<div><strong>&nbsp;&nbsp;Vorhanden:</strong></div><div class="kreis_green"></div>&nbsp;&nbsp;Ja<br />
         <div  id="kreis_yellow"><div class="kreis_yellow"></div>&nbsp;&nbsp;In Arbeit</div>
         <div class="kreis_red"></div>&nbsp;&nbsp;Nein`;
 
     var element = document.createElement("div");
     element.style.cssText =
-      "position:relative;top:10px;left:10px;background: lightcyan; width: 225px; height: 220px;";
+      "position:relative;top:10px;left:10px;background: lightcyan; width: 225px; height: 240px;";
     element.className = "ol-unselectable ol-control noiseselect";
     element.id = "controlEle";
     element.appendChild(objTextNode5);
@@ -194,6 +206,7 @@ class SelectorControl extends Control {
     element.appendChild(objLabel2);
     element.appendChild(objLabel3);
     element.appendChild(objLabel4);
+    element.appendChild(objLabel5);
     element.appendChild(divLegend);
 
 
@@ -218,6 +231,11 @@ class SelectorControl extends Control {
       false
     );
     objLabel4.addEventListener(
+      "change",
+      this.handleOtherChange.bind(this),
+      false
+    );
+    objLabel5.addEventListener(
       "change",
       this.handleOtherChange.bind(this),
       false
@@ -570,6 +588,9 @@ function updateWMS() {
   }
   if (document.getElementById("rad4").checked) {
     newStyle = 'openmaps:denkmaeler_osm'
+  }
+  if (document.getElementById("rad5").checked) {
+    newStyle = 'openmaps:denkmaeler_podcast'
   }
 
   wmsLayer.getSource().updateParams({
