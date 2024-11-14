@@ -148,11 +148,20 @@ class SelectorControl extends Control {
     radioItem5.name = "radioGrp";
     radioItem5.id = "rad5";
     radioItem5.value = "myradio5";
+
+    var radioItem6 = document.createElement("input");
+    radioItem6.type = "radio";
+    radioItem6.name = "radioGrp";
+    radioItem6.id = "rad6";
+    radioItem6.value = "myradio6";
+
     var objTextNode1 = document.createTextNode("3D Model");
     var objTextNode2 = document.createTextNode("Foto");
     var objTextNode3 = document.createTextNode("Wikipedia");
     var objTextNode4 = document.createTextNode("OpenStreetMap");
     var objTextNode5 = document.createTextNode("Podcast");
+    var objTextNode6 = document.createTextNode("3D Viewer Köln");
+
 
     var objLabel = document.createElement("label");
     objLabel.style.cssText = "position:absolute;top:50px;left:10px";
@@ -184,6 +193,12 @@ class SelectorControl extends Control {
     objLabel5.appendChild(radioItem5);
     objLabel5.appendChild(objTextNode5);
 
+    var objLabel6 = document.createElement("label");
+    objLabel6.style.cssText = "position:absolute;top:150px;left:10px;";
+    objLabel6.htmlFor = radioItem6.id;
+    objLabel6.appendChild(radioItem6);
+    objLabel6.appendChild(objTextNode6);
+
     var objTextNode5 = document.createElement("P");
     objTextNode5.innerHTML =
       "<strong>Was gibt es hier zu pflegen?</strong>";
@@ -191,14 +206,14 @@ class SelectorControl extends Control {
 
 
     var divLegend = document.createElement("p");
-    divLegend.style.cssText = "position:absolute;top:140px;left:5px";
+    divLegend.style.cssText = "position:absolute;top:160px;left:5px";
     divLegend.innerHTML = `<div><strong>&nbsp;&nbsp;Vorhanden:</strong></div><div class="kreis_green"></div>&nbsp;&nbsp;Ja<br />
         <div  id="kreis_yellow"><div class="kreis_yellow"></div>&nbsp;&nbsp;In Arbeit</div>
         <div class="kreis_red"></div>&nbsp;&nbsp;Nein`;
 
     var element = document.createElement("div");
     element.style.cssText =
-      "position:relative;top:10px;left:10px;background: lightcyan; width: 225px; height: 240px;";
+      "position:relative;top:10px;left:10px;background: lightcyan; width: 225px; height: 260px;";
     element.className = "ol-unselectable ol-control noiseselect";
     element.id = "controlEle";
     element.appendChild(objTextNode5);
@@ -207,6 +222,7 @@ class SelectorControl extends Control {
     element.appendChild(objLabel3);
     element.appendChild(objLabel4);
     element.appendChild(objLabel5);
+    element.appendChild(objLabel6);
     element.appendChild(divLegend);
 
 
@@ -236,6 +252,11 @@ class SelectorControl extends Control {
       false
     );
     objLabel5.addEventListener(
+      "change",
+      this.handleOtherChange.bind(this),
+      false
+    );
+    objLabel6.addEventListener(
       "change",
       this.handleOtherChange.bind(this),
       false
@@ -574,7 +595,7 @@ var map = new Map({
 function updateWMS() {
 
   // kein SLD notwendig, einfach den style anders setzen
-
+  debugger;
   // radios
   var newStyle;
   if (document.getElementById("rad1").checked) {
@@ -591,6 +612,9 @@ function updateWMS() {
   }
   if (document.getElementById("rad5").checked) {
     newStyle = 'openmaps:denkmaeler_podcast'
+  }
+  if (document.getElementById("rad6").checked) {
+    newStyle = 'openmaps:denkmaeler_viewer3d'
   }
 
   wmsLayer.getSource().updateParams({
@@ -668,6 +692,7 @@ map.on("singleclick", function (evt) {
     document.getElementById('edit_wikiUrl').value = '';
     document.getElementById('edit_podcastUrl').value = '';
     document.getElementById('edit_osm').checked = false;
+    document.getElementById('edit_viewer3d').checked = false;
     document.getElementById('edit_model_care').checked = false;
     document.getElementById('edit_denkmalliste').value = '';
     document.getElementById('edit_strasse').value = '';
@@ -723,12 +748,22 @@ map.on("singleclick", function (evt) {
             document.getElementById('edit_fotoUrl').value = fi.features[0].properties.fotourl;
             document.getElementById('edit_wikiUrl').value = fi.features[0].properties.wikiurl;
             document.getElementById('edit_podcastUrl').value = fi.features[0].properties.podcasturl;
+
             var osm = fi.features[0].properties.osm;
             if (osm === 'ja') {
               document.getElementById('edit_osm').checked = true;
             } else {
               document.getElementById('edit_osm').checked = false;
             }
+
+            var viewer3d = fi.features[0].properties.viewer3d;
+            if (viewer3d === 'ja') {
+              document.getElementById('edit_viewer3d').checked = true;
+            } else {
+              document.getElementById('edit_viewer3d').checked = false;
+            }
+
+
             var model3d = fi.features[0].properties.model3d;
             if (model3d === 'work') {
               document.getElementById('edit_model_care').checked = true;
@@ -857,10 +892,10 @@ map.on("singleclick", function (evt) {
               document.getElementById("careDenkmal").addEventListener("click", careDenkmal);
             }
             if (fi.features[0].properties.model3d === 'work') {
-              content.innerHTML += '<p><strong>Um das 3D Modell wird sich bereits gekümmert </strong></p>';
+              content.innerHTML += '<br/><strong>Um das 3D Modell wird sich bereits gekümmert </strong>';
             }
             if (fi.features[0].properties.model3d === 'ja') {
-              content.innerHTML += '<p><a target=\"_blank\"href=\"' + fi.features[0].properties.model3durl + '\">Link zum 3d Model </a></p>';
+              content.innerHTML += '<br/><a target=\"_blank\"href=\"' + fi.features[0].properties.model3durl + '\">Link zum 3d Model </a>';
             }
 
             // close button 4 mobile
@@ -878,6 +913,19 @@ map.on("singleclick", function (evt) {
 
             if (fi.features[0].properties.podcast === 'ja') {
               content.innerHTML += '<br/><a target=\"_blank\"href=\"' + fi.features[0].properties.podcasturl + '\">Hier geht es zum Podcast </a>';
+            }
+
+
+            if (fi.features[0].properties.viewer3d === 'ja') {
+
+              // convert coordinate to lat lon
+              var latlon = toLonLat(evt.coordinate);
+              lon = latlon[0];
+              lat = latlon[1];
+              // debugger
+              const viewer3durl = 'https://ertanoz.github.io/Cesium3DHeritageMap/Apps/3DHeritageMapApp.html?lon=' + lon + '&lat=' + lat;
+
+              content.innerHTML += '<br/><a target=\"_blank\"href=\"' + viewer3durl + '\">Modell im 3D Viewer Köln anschauen </a>';
             }
             overlay.setPosition(coordinate);
           }
@@ -1111,6 +1159,11 @@ function editDenkmal() {
       osmEdit = 'ja'
     } else { osmEdit = 'nein' }
 
+    var viewer3dEdit = document.getElementById('edit_viewer3d');
+    if (viewer3dEdit.checked === true) {
+      viewer3dEdit = 'ja'
+    } else { viewer3dEdit = 'nein' }
+
     var strasseEdit = document.getElementById('edit_strasse').value;
     var hausnummerEdit = document.getElementById('edit_hausnummer').value;
     var plzEdit = document.getElementById('edit_plz').value;
@@ -1129,7 +1182,7 @@ function editDenkmal() {
 &strasse=${strasseEdit}&hausnummer=${hausnummerEdit}&plz=${plzEdit}&stadtbezirk=${stadtbezirkEdit}&baujahr=${baujahrEdit}
 &unterschutzstellung=${unterschutzEdit}&eigentum=${eigentumEdit}&denkmalliste=${denkmallisteEdit}&kategorie=${kategorieEdit}&foto=${foto}
 &fotourl=${fotourlEdit}&wiki=${wiki}&wikiurl=${wikiurlEdit}&osm=${osmEdit}&aktualisierung=${aktualisierung}&architektur=${architekturEdit}
-&podcast=${podcast}&podcasturl=${podcasturlEdit}`;
+&podcast=${podcast}&podcasturl=${podcasturlEdit}&viewer3d=${viewer3dEdit}`;
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
