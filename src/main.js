@@ -923,7 +923,7 @@ map.on("singleclick", function (evt) {
               lon = latlon[0];
               lat = latlon[1];
               // debugger
-              const viewer3durl = 'https://ertanoz.github.io/Cesium3DHeritageMap/Apps/3DHeritageMapApp.html?lon=' + lon + '&lat=' + lat;
+              const viewer3durl = 'https://digital-heritage-lab.github.io/Cesium3DHeritageMap/Apps/3DHeritageMapApp.html?lon=' + lon + '&lat=' + lat;
 
               content.innerHTML += '<br/><a target=\"_blank\"href=\"' + viewer3durl + '\">Modell im 3D Viewer Köln anschauen </a>';
             }
