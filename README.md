@@ -13,3 +13,9 @@ Die Werkzeug Icons wurden erstellt von: SVG Repo svgrepo.com
 Das Weltkugel Loading Icon wurde erstellt von: loading.io
 
 Bitte die Lizenzbedingungen beachten.
+
+<img width="1350" height="816" alt="image" src="https://github.com/user-attachments/assets/993b88ec-8c81-45c2-bb04-778c8cb81cb8" />
+
+
+
+<img width="1186" height="706" alt="image" src="https://github.com/user-attachments/assets/4bfc2ae5-22fc-466c-a155-7719de2480db" />
