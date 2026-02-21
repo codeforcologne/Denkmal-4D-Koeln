@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta name="description"
+    content="Positionierungshilfe für 3D Modell ein Cesium Ion. Diese Anwendung wurde z.T. mit der Hilfe von KI erstellt und sorgfältig geprüft.">
+  <meta name="keywords" content="3D, Stadtmodell, Denkmäler, Köln, Open Data, Cesium Ion, Positionierung, LoD2">
+  <meta name="author" content="contact@opendemdata.info">
+  <title>Positionierungshilfe Cesium Ion</title>
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.136/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.136/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <!--  <link href="style.css" rel="stylesheet"> -->
+  <style type="text/css">
+    :root {
+      --primary: #2563eb;
+      --bg-panel: rgba(255, 255, 255, 0.95);
+      --glass-blur: 8px;
+      --ui-radius: 10px;
+    }
+
+    html,
+    body,
+    #cesiumContainer {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #transformControls {
+      position: fixed;
+      left: 5px;
+      top: 5px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(var(--glass-blur));
+      padding: 14px 16px;
+      border-radius: var(--ui-radius);
+      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.18);
+      z-index: 4;
+      font-family: Inter, system-ui, Arial, sans-serif;
+      color: #0f172a;
+      width: 350px;
+    }
+
+    #transformControls .panel-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .form-row label {
+      flex: 1 1 40%;
+      font-size: 13px;
+      color: #0f172a;
+    }
+
+    .panel-input {
+      flex: 1 1 60%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(2, 6, 23, 0.08);
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .panel-input:focus {
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.12);
+      border-color: rgba(37, 99, 235, 0.35);
+    }
+
+    .small-muted {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .copy-btn {
+      border: 1px solid rgba(2, 6, 23, 0.08);
+      background: transparent;
+      padding: 6px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      min-width: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(2, 6, 23, 0.04);
+    }
+
+    .copy-btn.copied {
+      background: var(--primary);
+      color: #fff;
+      border-color: rgba(37, 99, 235, 0.35);
+    }
+
+    .panel-logo {
+      height: 50px;
+      width: auto;
+      border-radius: 6px;
+      margin-right: 10px;
+      display: inline-block;
+    }
+
+    .modal-logo {
+      height: 50px;
+      width: auto;
+      border-radius: 6px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    /* small icon buttons in header */
+    .header-icons {
+      display: flex;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid rgba(2, 6, 23, 0.06);
+      padding: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .removeButton {
+      padding: 10px;
+      background-color: lightgrey;
+    }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 23, 0.45);
+      z-index: 2147483647;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 10px;
+      max-width: 720px;
+      width: 92%;
+      box-shadow: 0 18px 40px rgba(2, 6, 23, 0.3);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-title {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width:640px) {
+
+      #transformControls {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        top: auto;
+        bottom: 12px;
+      }
+    }
+
+    .modal .modal-content {
+      max-height: 72vh;
+      overflow: auto;
+      padding: 14px;
+      z-index: 2147483648;
+    }
+
+    .modal .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+
+    .modal-body {
+      margin: 10px;
+    }
+
+    .entity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Inter, system-ui, Arial, sans-serif;
+      font-size: 13px;
+    }
+
+    .entity-table th,
+    .entity-table td {
+      border: 1px solid rgba(2, 6, 23, 0.06);
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    .entity-table th {
+      background: #f6f7fb;
+      text-align: left;
+      width: 34%;
+      font-weight: 600;
+    }
+
+    .entity-table tr:nth-child(even) td {
+      background: rgba(2, 6, 23, 0.02);
+    }
+
+    .entity-table td {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+
+<body type="module">
+  <div id="cesiumContainer"></div>
+
+
+  <div id="transformControls">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;">
+        <img src="Images/oklab_koelle.png" class="panel-logo" alt="Logo">
+        <div class="panel-title">Modell Plazierungshilfe - Cesium ION</div>
+      </div>
+      <div class="header-icons">
+        <button class="icon-btn" id="btn-impressum" aria-label="Impressum">ℹ️</button>
+        <button class="icon-btn" id="btn-datenschutz" aria-label="Datenschutz">🔒</button>
+      </div>
+    </div>
+    <div class="form-row"><label for="input-lon">Lon</label>
+      <div class="input-group"><input id="input-lon" class="panel-input" type="number" step="0.000001"><button
+          class="copy-btn" data-target="input-lon" aria-label="Copy longitude">📋</button></div>
+    </div>
+    <div class="form-row"><label for="input-lat">Lat</label>
+      <div class="input-group"><input id="input-lat" class="panel-input" type="number" step="0.000001"><button
+          class="copy-btn" data-target="input-lat" aria-label="Copy latitude">📋</button></div>
+    </div>
+    <div class="form-row"><label for="input-height">Height (m)</label>
+      <div class="input-group"><input id="input-height" class="panel-input" type="number" step="0.1"><button
+          class="copy-btn" data-target="input-height" aria-label="Copy height">📋</button></div>
+    </div>
+    <div class="form-row"><label for="input-heading">Heading (°)</label>
+      <div class="input-group"><input id="input-heading" class="panel-input" type="number" step="1"><button
+          class="copy-btn" data-target="input-heading" aria-label="Copy heading">📋</button></div>
+    </div>
+    <div class="form-row"><label for="input-pitch">Pitch (°)</label>
+      <div class="input-group"><input id="input-pitch" class="panel-input" type="number" step="1"><button
+          class="copy-btn" data-target="input-pitch" aria-label="Copy pitch">📋</button></div>
+    </div>
+    <div class="form-row"><label for="input-roll">Roll (°)</label>
+      <div class="input-group"><input id="input-roll" class="panel-input" type="number" step="1"><button
+          class="copy-btn" data-target="input-roll" aria-label="Copy roll">📋</button></div>
+    </div>
+    <div class="small-muted">Werte anpassen um Modell zu positionieren</div>
+    <div class="small-muted">LoD2 Gebäude anklicken um die Attribute abzufragen und das Gebäude zu entfernen.</div>
+    <div class="form-row"><label for="input-ionassetid">IonAssetId eingeben</label>
+      <div class="input-group"><input id="input-ionassetid" class="panel-input" type="text" step="1"></div>
+    </div>
+    <div class="form-row"><label for="input-ionaccesstoken">AccessToken eingeben</label>
+      <div class="input-group"><input id="input-ionaccesstoken" class="panel-input" type="text" step="1"></div>
+    </div>
+    <button data-target="load-model" aria-label="Modell einladen" onclick="loadModel()">Modell einladen</button>
+  </div>
+  </div>
+
+
+  <!-- Modals -->
+  <div id="modal-impressum" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-content" role="document">
+      <button class="modal-close" data-close>&times;</button>
+      <div style="display:flex;align-items:center;margin-bottom:6px;"><img src="Images/oklab_koelle.png"
+          class="modal-logo" alt="Logo">
+        <div class="modal-title">Impressum</div>
+      </div>
+      <div class="modal-body">
+        <p>Verantwortlich für diesen Webauftritt ist: <br />Martin Over,<br /> c/o OK Lab Köln,<br />
+          Hackländerstraße 2,<br /> 50825 Köln,<br /> contact(at)OpenDEMData.info</p>
+        <h3>Informationen</h3>
+        <p>Mit dieser Anwendung können 3D Modelle im Kontext mit LoD2 Modellen positioniert werden.</p>
+        <p>Hier handelt es sich um ein Beispiel mit den LoD2 Daten von Geobasis für Köln (Stand 2/2026)</p>
+        <p>Es ist gar nicht so einfach, in Cesium Ion die Modelle nur auf Basis der Luftbilder zu platzieren,
+          insbesondere wenn Nebengebäude vorhanden sind.
+          Diese Anwendung soll dabei helfen, die Werte für die Positionierung zu ermitteln.
+          Diese können dann in Cesium Ion eingetragen werden.
+        </p>
+        <p><strong>Achtung! Die Werte aus Cesium Ion werden z.T. etwas anders ausgelesen.
+            Dies macht aber nichts, da die hier erstellten Werte gut passen, wenn diese nachher in Cesium Ion
+            eingetragen werden.
+          </strong></p>
+        <p>Um andere LoD Modelle zu verwenden, muss der Code dieser Webseite angepasst werden.
+          Weitere Informationen dazu befinden sich im Quelltext der Webeite.
+        </p>
+        <p>Diese Anwendung wurde z.T. mit der Hilfe von KI erstellt und sorgfältig geprüft.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-datenschutz" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-content" role="document">
+      <button class="modal-close" data-close>&times;</button>
+      <div style="display:flex;align-items:center;margin-bottom:6px;"><img src="Images/oklab_koelle.png"
+          class="modal-logo" alt="Logo">
+        <div class="modal-title">Datenschutzerklärung</div>
+      </div>
+      <div class="modal-body">
+        <h3 id="disclaimer">Haftungsausschluss</h3>
+        <h4 id="legal_disclaimer_content">Haftung für Inhalte</h4>
+        <p id="legal_disclaimer_content_text">Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die
+          Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als
+          Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen
+          Gesetzen
+          verantwortlich. Nach § 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder
+          gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige
+          Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den
+          allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt
+          der
+          Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen
+          werden wir diese Inhalte umgehend entfernen.</p>
+        <h4 id="legal_disclaimer_content_links">Haftung für Links</h4>
+        <p id="legal_disclaimer_content_links_text">Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren
+          Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen.
+          Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten
+          verantwortlich.
+          Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige
+          Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der
+          verlinkten
+          Seiten ist jedoch ohne konkrete Anhaltspunkte</p>
+        <h4 id="legal_author">Urheberrecht</h4>
+        <p id="legal_author_text">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten
+          unterliegen
+          dem deutschen Urheberrecht. Sie sind mit einer Creative Commons Lizenz urheberrechtlich geschützt. Sofern
+          nicht
+          anders angegeben, stehen die Inhalte dieser Seite unter der Creative Commons Zero DE Lizenz. Soweit
+          die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet.
+          Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine
+          Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von
+          Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.</p>
+        <h3 id="data_privacy_statement">Datenschutzerklärung</h3>
+        <h3>Hosting</h3>
+        <p>
+          Unser Hoster erhebt in sog. Logfiles folgende Daten, die Ihr
+          Browser übermittelt:
+        </p>
+        <li>
+          IP-Adresse, die Adresse der vorher besuchten Website
+          (Referer Anfrage-Header)
+        </li>
+        <li>Datum und Uhrzeit der Anfrage</li>
+        <li>Zeitzonendifferenz zur Greenwich Mean Time</li>
+        <li>Inhalt der Anforderung</li>
+        <li>HTTP-Statuscode</li>
+        <li>übertragene Datenmenge</li>
+        <li>Website, von der die Anforderung kommt</li>
+        <li>Informationen zu Browser und Betriebssystem</li>
+        <p>
+          Das ist erforderlich, um unsere Website anzuzeigen und die
+          Stabilität und Sicherheit zu gewährleisten. Dies entspricht
+          unserem berechtigten Interesse im Sinne des Art. 6 Abs. 1 S.
+          1 lit. f DSGVO.
+        </p>
+        <p>
+          Es erfolgt kein Tracking und wir haben auf diese Daten
+          keinen direkten Zugriff, sondern erhalten lediglich eine
+          anonymisierte, statistische Zusammenfassung. Diese
+          beinhaltet die Adresse der vorher besuchten Seite, die
+          Häufigkeit der jeweils aufgerufenen Seiten und die Anzahl
+          eindeutiger Besucher. Diese Daten führen wir nicht mit
+          anderen Daten zusammen.
+        </p>
+        <p>
+          Wir setzen für die Zurverfügungstellung unserer Website
+          folgenden Hoster ein:
+        </p>
+        <p>
+          GitHub Inc.<br />
+          88 Colin P Kelly Jr St<br />
+          San Francisco, CA 94107<br />
+          United States
+        </p>
+        <p>
+          Dieser ist Empfänger Ihrer personenbezogenen Daten. Dies
+          entspricht unserem berechtigten Interesse im Sinne des Art.
+          6 Abs. 1 S. 1 lit. f DSGVO, selbst keinen Server in unseren
+          Räumlichkeiten vorhalten zu müssen. Serverstandort ist USA.
+        </p>
+        <p>
+          Weitere Informationen zu Widerspruchs- und
+          Beseitigungsmöglichkeiten gegenüber GitHub finden Sie unter:
+        </p>
+        <a class="blackdiv" target="_blank"
+          href="https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages">https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-privacy-statement#github-pages</a>
+
+        <p>Sie haben das Recht der Verarbeitung zu widersprechen.</p>
+        <p>
+          Ob der Widerspruch erfolgreich ist, ist im Rahmen einer
+          Interessenabwägung zu ermitteln.
+        </p>
+        <p>
+          Die Daten werden gelöscht, sobald der Zweck der Verarbeitung
+          entfällt.
+        </p>
+        <p>
+          Die Verarbeitung der unter diesem Abschnitt angegebenen
+          Daten ist weder gesetzlich noch vertraglich vorgeschrieben.
+          Die Funktionsfähigkeit der Website ist ohne die Verarbeitung
+          nicht gewährleistet.
+        </p>
+        <p>
+          GitHub hat Compliance-Maßnahmen für internationale
+          Datenübermittlungen umgesetzt. Diese gelten für alle
+          weltweiten Aktivitäten, bei denen GitHub personenbezogene
+          Daten von natürlichen Personen in der EU verarbeitet. Diese
+          Maßnahmen basieren auf den EU-Standardvertragsklauseln
+          (SCCs). Weitere Informationen finden Sie unter:
+        </p>
+        <a class="blackdiv" target="_blank"
+          href="https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-data-protection-addendum#attachment-1–the-standard-contractual-clauses-processors">https://docs.github.com/en/free-pro-team@latest/github/site-policy/github-data-protection-addendum#attachment-1–the-standard-contractual-clauses-processors</a>
+
+        <h3>Rechtliche Hinweise</h3>
+        <p>
+          Grundsätzlich ist ein Auftragsverarbeitungsvertrag mit dem
+          Hoster abzuschließen. Das bayerische Landesamt für
+          Datenschutzaufsicht hat für das Hosting rein statischer
+          Websites eine Ausnahme gemacht. Für den Fall, dass die
+          Webseite der Selbstdarstellung dient, z.B. von Vereinen oder
+          Kleinunternehmen, keine personenbezogenen Daten an den
+          Betreiber fließen und kein Tracking stattfindet, liegt keine
+          Auftragsverarbeitung vor. Weiter heißt es: „Die Tatsache,
+          dass auch beim Hosting von statischen Webseiten zwangsläufig
+          IP-Adressen, d.h. personenbezogene Daten, verarbeitet werden
+          müssen, führt nicht zur Annahme einer Auftragsverarbeitung.
+          Das wäre nicht sachgerecht. Die (kurzfristige)
+          IP-Adressenspeicherung ist vielmehr noch der
+          TK-Zugangsvermittlung des Website-Hosters nach dem TKG
+          zuzurechnen und dient in erster Linie Sicherheitszwecken des
+          Hosters.“<br />
+          (<a class="blackdiv" target="_blank"
+            href="https://www.lda.bayern.de/media/veroeffentlichungen/FAQ_Hosting_keine_Auftragsverarbeitung.pdf">https://www.lda.bayern.de/media/veroeffentlichungen/FAQ_Hosting_keine_Auftragsverarbeitung.pdf</a>)
+        </p>
+        <p>
+          Wir gehen davon aus, dass diese Ausnahme auf GitHub Pages
+          anzuwenden ist.
+        </p>
+        <h4 id="data_privacy_statement_text10">Karten</h4>
+        <p id="data_privacy_statement_text11">Die hier stnadradmäßig gezeigten Hintergrundkarten & Daten stammen von:
+        </p>
+        <ul>
+          <li>Cesium <a href="https://cesium.com/legal/privacy-policy/"
+              target="_blank">https://cesium.com/legal/privacy-policy/</a></li>
+          <li>Bing Maps <a href="https://www.microsoft.com/de-de/privacy/privacystatement"
+              target="_blank">https://www.microsoft.com/de-de/privacy/privacystatement</a></li>
+          <li> Es können weitere Karten und Daten über das "Imagery" Werkzeug hinzugefügt werden. Die
+            Datenschutzbedingungen
+            können je nach Datenquelle variieren und sollten vor der Nutzung überprüft werden.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+
+    let tileset;
+
+    // Globals for LoD tilesets so other handlers (like removeBuilding) can update their styles
+    let tilesetLOd2East_global = null;
+    let tilesetLOd2West_global = null;
+
+    // Registry to keep track of loaded tilesets and allow targeting a specific tileset
+    const tilesetRegistry = new Map();
+    let nextTilesetRegistryId = 1;
+    function registerTileset(tileset, label) {
+      if (!tileset) return null;
+      if (tileset._registryId) return tileset._registryId;
+      const id = 'ts' + (nextTilesetRegistryId++);
+      tileset._registryId = id;
+      tilesetRegistry.set(id, tileset);
+      if (!tileset.userData) tileset.userData = {};
+      tileset.userData.registryId = id;
+      tileset.userData.label = label || id;
+      return id;
+    }
+
+    // Global currently-controlled tileset for transformControls
+    let currentTileset = null;
+
+    // Apply UI values to the current tileset (global function)
+    function updateTilesetTransformFromUI() {
+      const target = currentTileset || tileset;
+      if (!target) return;
+      const lon = Number(document.getElementById('input-lon').value);
+      const lat = Number(document.getElementById('input-lat').value);
+      const height = Number(document.getElementById('input-height').value);
+      const headingDeg = Number(document.getElementById('input-heading').value);
+      const pitchDeg = Number(document.getElementById('input-pitch').value);
+      const rollDeg = Number(document.getElementById('input-roll').value);
+
+      try { target.clampToGround = true; } catch (e) { }
+      const origin = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+      const hpr = new Cesium.HeadingPitchRoll(
+        Cesium.Math.toRadians(headingDeg),
+        Cesium.Math.toRadians(pitchDeg),
+        Cesium.Math.toRadians(rollDeg)
+      );
+      target.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(origin, hpr, Cesium.Ellipsoid.WGS84);
+    }
+
+    loadModel = async function () {
+
+      const assetId = document.getElementById('input-ionassetid').value;
+      const accessToken = document.getElementById('input-ionaccesstoken').value;
+      if (!assetId || !accessToken) {
+        alert('Bitte Asset ID und Access Token eingeben');
+        return;
+      }
+
+      Cesium.Ion.defaultAccessToken = accessToken;
+
+      const resource = await Cesium.IonResource.fromAssetId(assetId, {
+        accessToken: accessToken
+      });
+
+      tileset = await Cesium.Cesium3DTileset.fromUrl(resource);
+      viewer.scene.primitives.add(tileset);
+      await tileset.readyPromise;
+      currentTileset = tileset;
+      tileset.clampToGround = true;
+      tileset.imageBasedLighting.imageBasedLightingFactor.x = 8.0;
+      tileset.imageBasedLighting.imageBasedLightingFactor.y = 8.0;
+
+
+      // world center (account for modelMatrix if present)
+      const localCenter = tileset.boundingSphere.center;
+      const worldCenter = (tileset.modelMatrix && !Cesium.Matrix4.equals(tileset.modelMatrix, Cesium.Matrix4.IDENTITY))
+        ? Cesium.Matrix4.multiplyByPoint(tileset.modelMatrix, localCenter, new Cesium.Cartesian3())
+        : localCenter;
+
+      // lon/lat/height
+      const cartoTile = Cesium.Cartographic.fromCartesian(worldCenter);
+      const lon = Cesium.Math.toDegrees(cartoTile.longitude);
+      const lat = Cesium.Math.toDegrees(cartoTile.latitude);
+      const height = cartoTile.height;
+
+      // heading/pitch/roll
+      let hpr;
+      try {
+        // prefer helper if available
+        hpr = Cesium.Transforms.fixedFrameToHeadingPitchRoll(tileset.modelMatrix || Cesium.Matrix4.IDENTITY, Cesium.Ellipsoid.WGS84);
+      } catch (e) {
+        // fallback: extract rotation, quaternion, then HPR
+        const rot = new Cesium.Matrix3();
+        Cesium.Matrix4.getRotation(tileset.modelMatrix || Cesium.Matrix4.IDENTITY, rot);
+        const q = Cesium.Quaternion.fromRotationMatrix(rot);
+        hpr = Cesium.HeadingPitchRoll.fromQuaternion(q);
+      }
+
+      // Use numeric values
+      const headingDeg = Cesium.Math.toDegrees(hpr.heading);
+      const pitchDeg = Cesium.Math.toDegrees(hpr.pitch);
+      const rollDeg = Cesium.Math.toDegrees(hpr.roll);
+
+      console.log({ lon, lat, height, headingDeg, pitchDeg, rollDeg });
+
+      const initialRootTransform = Cesium.Matrix4.clone(tileset.root.transform);
+      tileset.root.transform = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
+      tileset.modelMatrix = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
+
+      document.getElementById('input-lon').value = lon;
+      document.getElementById('input-lat').value = lat;
+      document.getElementById('input-height').value = height;
+      document.getElementById('input-heading').value = headingDeg;
+      document.getElementById('input-pitch').value = pitchDeg;
+      document.getElementById('input-roll').value = rollDeg;
+
+      updateTilesetTransformFromUI();
+      viewer.flyTo(tileset);
+    }
+
+    // Your access token can be found at: https://ion.cesium.com/tokens.
+    // Replace this token with your Cesium ion access token.
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMjhiN2RhOC1lYThlLTQ3NGEtYWQ3NC05YjRmOTI5M2M0OWEiLCJpZCI6NzgzODEsImlhdCI6MTcxMDc5ODQ0MH0.nuQD0pwTIy_aHKIqEGLzrhxCCCelkCHyNeJURm3v-Q8';
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrain: Cesium.Terrain.fromWorldTerrain(),
+      infoBox: false,
+      selectionIndicator: false
+    });
+    viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    // Wrap all async code in an async function
+    async function initializeScene() {
+
+      // CityGML models 
+      // Here we have two separate tilesets.
+      // adapt this with your own AssetId(s) and AccessToken(s)      
+      // Do not use Cesium.IonResource.fromAssetId, because the accessToken will be overwritten with the defaultAccessToken!
+      // west cologne
+      const resourceWest = await Cesium.IonResource.fromAssetId(4382415, {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNGNjZmZhMi0wYWZjLTRmOTUtYTkxMi00NTVmODhjMDlkNjkiLCJpZCI6MzgzMjY1LCJpYXQiOjE3Njk0NDEzMzN9.R2m7MFamEMTiO81VChtkLLhlEVgfHNv-qXoQDZ-fe0c'
+      });
+      const tilesetLOd2West = await Cesium.Cesium3DTileset.fromUrl(resourceWest);
+      viewer.scene.primitives.add(tilesetLOd2West);
+      await tilesetLOd2West.readyPromise;
+      tilesetLOd2West_global = tilesetLOd2West;
+
+      // east cologne
+      const resourceEast = await Cesium.IonResource.fromAssetId(4383827, {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjZmY3NTE0Ni00MjQ4LTRiMjAtYTJiYy1jODdmMWYxMGQ2OWIiLCJpZCI6MzgzNDA1LCJpYXQiOjE3Njk0MDg4ODZ9.eZr19bHXXVcMk9_E_JasN6tfzubdu_qsJa2j41BpgXI'
+      });
+      const tilesetLOd2East = await Cesium.Cesium3DTileset.fromUrl(resourceEast);
+      viewer.scene.primitives.add(tilesetLOd2East);
+      await tilesetLOd2East.readyPromise;
+      tilesetLOd2East_global = tilesetLOd2East;
+      tilesetLOd2East.style = new Cesium.Cesium3DTileStyle({
+
+        // Create a style rule to control each building's "show" property.
+        show: {
+          conditions: [
+            // Any building that has this elementId will have `show = false`.
+            ["${feature['gml:id']} === 'DENW37AL1000qtY0'", false],
+            // If a building does not have one of these elementIds, set `show = true`.
+            [true, true]
+          ]
+        },
+        // Set the default color style for this particular 3D Tileset.
+        color: {
+          conditions: [
+            ["${feature['surfaceType']} === 'RoofSurface' || ${feature['surfaceType']} === 'roof'", "color('red')"],
+            ["${feature['surfaceType']} === 'WallSurface' || ${feature['surfaceType']} === 'wall'", "color('grey')"],
+            [true, "color('white')"]
+          ]
+        }
+
+      });
+
+
+      // Click handler: pick feature and show its properties (including gml:id)
+      const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      handler.setInputAction(function (movement) {
+        const pickedFeature = viewer.scene.pick(movement.position);
+        if (!Cesium.defined(pickedFeature)) return;
+
+        const tileset = pickedFeature.tileset || pickedFeature.primitive || (pickedFeature.content && pickedFeature.content.tileset);
+        console.log('tileset:', tileset);
+
+        // Collect properties into an object
+        let propsObj = {};
+        try {
+          if (typeof pickedFeature.getPropertyIds === 'function') {
+            const ids = pickedFeature.getPropertyIds();
+            if (ids && ids.length) {
+              ids.forEach(id => { propsObj[id] = pickedFeature.getProperty(id); });
+            }
+          }
+        } catch (e) { /* ignore */ }
+
+        // Try common property names for id
+        const gmlId = pickedFeature.getProperty && (pickedFeature.getProperty('gml:id') || pickedFeature.getProperty('gml_id') || pickedFeature.getProperty('id') || pickedFeature.getProperty('elementId'));
+        if (gmlId) propsObj['gml:id'] = gmlId;
+
+
+        // Build modal (reuse same modalId)
+        const modalId = 'modal-entity-info';
+        let modal = document.getElementById(modalId);
+        if (!modal) {
+          modal = document.createElement('div');
+          modal.id = modalId;
+          modal.className = 'modal';
+          modal.setAttribute('role', 'dialog');
+          modal.setAttribute('aria-hidden', 'true');
+          modal.innerHTML = `
+            <div class="modal-content" role="document">
+              <button class="modal-close" data-close>&times;</button>
+              <div style="display:flex;align-items:center;margin-bottom:6px;"><div class="modal-title">Feature Details</div></div>
+              <div class="modal-body" id="${modalId}-body"></div>
+            </div>
+          `;
+          document.body.appendChild(modal);
+          modal.querySelector('[data-close]').addEventListener('click', (e) => closeModal(e.target));
+          modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
+        }
+
+        // register tileset (if present) so we can target it later
+        if (tileset) {
+          registerTileset(tileset, tileset.userData && tileset.userData.label ? tileset.userData.label : 'picked');
+        }
+
+        const body = document.getElementById(modalId + '-body');
+        body.innerHTML = '';
+
+        // Build a nice table from propsObj
+        const tbl = document.createElement('table');
+        tbl.className = 'entity-table';
+        const keys = Object.keys(propsObj);
+        if (keys.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.textContent = 'Keine Eigenschaften verfügbar';
+          tr.appendChild(td); tbl.appendChild(tr);
+        } else {
+          keys.forEach(k => {
+            const tr = document.createElement('tr');
+            const th = document.createElement('th'); th.textContent = k;
+            const td = document.createElement('td');
+            const v = propsObj[k];
+            td.textContent = (typeof v === 'object') ? JSON.stringify(v) : String(v);
+            tr.appendChild(th); tr.appendChild(td); tbl.appendChild(tr);
+          });
+        }
+        body.appendChild(tbl);
+
+        // remove previous action button if any
+        const existingAct = modal.querySelector('.modal-action');
+        if (existingAct) existingAct.remove();
+
+        // create action button that targets the picked tileset only
+        const actionBtn = document.createElement('button');
+        actionBtn.type = 'button';
+        actionBtn.className = 'icon-btn modal-action removeButton';
+        actionBtn.textContent = 'Gebäude ausblenden';
+        actionBtn.addEventListener('click', function () {
+          const regId = tileset && tileset._registryId ? tileset._registryId : null;
+          if (!regId) {
+            alert('Tileset nicht registriert - Aktion kann nicht ausgeführt werden');
+            return;
+          }
+          removeBuildingForTileset(gmlId, regId);
+        });
+        modal.querySelector('.modal-content').appendChild(actionBtn);
+
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      tileset = viewer.scene.primitives.add(
+        await Cesium.Cesium3DTileset.fromIonAssetId(4200126),
+      );
+      // Wait until tileset is ready before using boundingSphere or applying transforms
+      await tileset.readyPromise;
+      // Default: when using explicit modelMatrix, keep clampToGround off so transforms apply cleanly
+      tileset.clampToGround = true;
+      tileset.imageBasedLighting.imageBasedLightingFactor.x = 8.0;
+      tileset.imageBasedLighting.imageBasedLightingFactor.y = 8.0;
+
+      // world center (account for modelMatrix if present)
+      const localCenter = tileset.boundingSphere.center;
+      const worldCenter = (tileset.modelMatrix && !Cesium.Matrix4.equals(tileset.modelMatrix, Cesium.Matrix4.IDENTITY))
+        ? Cesium.Matrix4.multiplyByPoint(tileset.modelMatrix, localCenter, new Cesium.Cartesian3())
+        : localCenter;
+
+      // lon/lat/height
+      const cartoTile = Cesium.Cartographic.fromCartesian(worldCenter);
+      const lon = Cesium.Math.toDegrees(cartoTile.longitude);
+      const lat = Cesium.Math.toDegrees(cartoTile.latitude);
+      const height = cartoTile.height;
+
+      // heading/pitch/roll
+      let hpr;
+      try {
+        // prefer helper if available
+        hpr = Cesium.Transforms.fixedFrameToHeadingPitchRoll(tileset.modelMatrix || Cesium.Matrix4.IDENTITY, Cesium.Ellipsoid.WGS84);
+      } catch (e) {
+        // fallback: extract rotation, quaternion, then HPR
+        const rot = new Cesium.Matrix3();
+        Cesium.Matrix4.getRotation(tileset.modelMatrix || Cesium.Matrix4.IDENTITY, rot);
+        const q = Cesium.Quaternion.fromRotationMatrix(rot);
+        hpr = Cesium.HeadingPitchRoll.fromQuaternion(q);
+      }
+
+      // Use numeric values
+      const headingDeg = Cesium.Math.toDegrees(hpr.heading);
+      const pitchDeg = Cesium.Math.toDegrees(hpr.pitch);
+      const rollDeg = Cesium.Math.toDegrees(hpr.roll);
+
+      console.log({ lon, lat, height, headingDeg, pitchDeg, rollDeg });
+
+      // Helper to update tileset transform from UI inputs
+      function updateTilesetTransformFromUI() {
+
+        const lon = Number(document.getElementById('input-lon').value);
+        const lat = Number(document.getElementById('input-lat').value);
+        const height = Number(document.getElementById('input-height').value);
+        const headingDeg = Number(document.getElementById('input-heading').value);
+        const pitchDeg = Number(document.getElementById('input-pitch').value);
+        const rollDeg = Number(document.getElementById('input-roll').value);
+        
+        tileset.clampToGround = true;
+        const origin = Cesium.Cartesian3.fromDegrees(lon, lat, height);
+        const hpr = new Cesium.HeadingPitchRoll(
+          Cesium.Math.toRadians(headingDeg),
+          Cesium.Math.toRadians(pitchDeg),
+          Cesium.Math.toRadians(rollDeg)
+        );
+        tileset.modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(origin, hpr, Cesium.Ellipsoid.WGS84);
+      }
+
+      const initialRootTransform = Cesium.Matrix4.clone(tileset.root.transform);
+      tileset.root.transform = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
+      tileset.modelMatrix = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
+
+      document.getElementById('input-lon').value = lon;
+      document.getElementById('input-lat').value = lat;
+      document.getElementById('input-height').value = height;
+      document.getElementById('input-heading').value = headingDeg;
+      document.getElementById('input-pitch').value = pitchDeg;
+      document.getElementById('input-roll').value = rollDeg;
+      
+      // Wire inputs to update transform live
+      ['input-lon', 'input-lat', 'input-height', 'input-heading', 'input-pitch', 'input-roll'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+          updateTilesetTransformFromUI();
+        });
+      });
+
+      // Apply initial transform
+      updateTilesetTransformFromUI();
+
+      // Move the camera to the building.
+      // View from East at 45° angle
+
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(6.96323696275565, 50.937041031949306, 120),
+        orientation: {
+          heading: Cesium.Math.toRadians(270.0),    // East direction
+          pitch: Cesium.Math.toRadians(-25.0),      // 45° angle downward
+          roll: 0.0
+        },
+        duration: 3
+      });
+
+    }
+
+
+    // Call the async function to initialize the scene
+    initializeScene().catch(error => {
+      console.error('Error initializing scene:', error);
+    });
+
+    // Attach copy-to-clipboard handlers for transform inputs
+    function attachCopyButtons() {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const targetId = btn.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          if (!input) return;
+          try {
+            await navigator.clipboard.writeText(String(input.value));
+            const prev = btn.innerHTML;
+            btn.classList.add('copied');
+            btn.innerHTML = '✓';
+            setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = prev; }, 1400);
+          } catch (err) {
+            console.error('Copy failed', err);
+          }
+        });
+      });
+    }
+
+    // run attachment now (DOM is already parsed since script is at end of body)
+    attachCopyButtons();
+
+    // Modal helpers
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (!m) return;
+      m.classList.add('open');
+      m.setAttribute('aria-hidden', 'false');
+    }
+    function closeModal(el) {
+      const modal = el.closest('.modal');
+      if (!modal) return;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    // Wire header buttons
+    document.getElementById('btn-impressum').addEventListener('click', () => openModal('modal-impressum'));
+    document.getElementById('btn-datenschutz').addEventListener('click', () => openModal('modal-datenschutz'));
+
+    // Close handlers (buttons and overlay)
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', (e) => closeModal(e.target)));
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', (e) => { if (e.target === m) closeModal(m); }));
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(m => closeModal(m)); });
+
+    function removeBuildingForTileset(gmlId, registryId) {
+      if (!gmlId || !registryId) {
+        alert('gml:id oder tileset registry id fehlt');
+        return;
+      }
+      const tileset = tilesetRegistry.get(registryId);
+      if (!tileset) {
+        alert('Tileset nicht gefunden: ' + registryId);
+        return;
+      }
+
+      const expr = "${feature['gml:id']} === '" + gmlId + "'";
+      const showConds = [[expr, false], [true, true]];
+      const colorConds = [
+        ["${feature['surfaceType']} === 'RoofSurface' || ${feature['surfaceType']} === 'roof'", "color('red')"],
+        ["${feature['surfaceType']} === 'WallSurface' || ${feature['surfaceType']} === 'wall'", "color('grey')"],
+        [true, "color('white')"]
+      ];
+
+      const newStyle = new Cesium.Cesium3DTileStyle({ show: { conditions: showConds }, color: { conditions: colorConds } });
+      tileset.style = newStyle;
+
+      // Close entity modal if open
+      const modal = document.getElementById('modal-entity-info');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    // Backwards-compatible helper: apply to known global LoD tilesets
+    function removeBuilding(gmlId) {
+      if (tilesetLOd2East_global) {
+        const id = registerTileset(tilesetLOd2East_global, 'LOD2 East');
+        removeBuildingForTileset(gmlId, id);
+      }
+      if (tilesetLOd2West_global) {
+        const id = registerTileset(tilesetLOd2West_global, 'LOD2 West');
+        removeBuildingForTileset(gmlId, id);
+      }
+    }
+
+  </script>
+</body>
+
+</html>
