@@ -317,6 +317,28 @@
         background-color: black;
         color: white;
         z-index: 9999;
+        max-width: 900px;
+      }
+    }
+
+
+    /* dives >= 1000px center */
+    @media (min-width: 1000px) {
+      .modal3 {        
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, 0);
+        width: 90%;
+        max-width: 900px;
+        padding: 20px;
+        display: none;
+        position: fixed;
+        top: 100px;
+        bottom: 100px;
+        background-color: black;
+        color: white;
+        z-index: 9999;
+        
       }
     }
 
@@ -490,10 +512,11 @@
     <div id="selectHelp" class="modal_content">
       <nav>
         <a class="blackdiv" href="#hilfe_anker">Hilfe</a><br />
-        <a class="blackdiv" href="#hilfe_model">Anleitung 3D Modelle erstellen</a><br />
+        <a class="blackdiv" href="#hilfe_model">Anleitung 3D Modelle erstellen mittels Fotos oder Videos</a><br />
         <a class="blackdiv" href="#hilfe_wikimedia">Anleitung Fotos in Wikimedia einpflegen</a><br />
         <a class="blackdiv" href="#hilfe_wikipedia">Anleitung Wikipedia Artikel schreiben</a><br />
         <a class="blackdiv" href="#hilfe_osm">Anleitung Daten in OSM einpflegen</a><br />
+        <a class="blackdiv" href="#hilfe_diy">Anleitung DIY Stadtmodelle</a><br />
         <a class="blackdiv" href="#oklab">Über CodeforCologne [OK-Lab Köln]</a><br />
         <a class="blackdiv" href="#kontakt">Kontakt</a><br />
         <a class="blackdiv" href="#data_download">Daten Downkload</a><br />
@@ -591,8 +614,13 @@
         Lokalisierung.
       </p>
 
-      <h2 id="hilfe_model">Wie kann ich 3D Modelle erstellen?</h2>
-      <h3>1. Meshroom:</h3>
+      <h2 id="hilfe_model">Wie kann ich 3D Modelle mittels Fotos oder Videos erstellen?</h2>
+
+      <h3> Photogrammetrie</h3>
+      Photogrammetrie ist ein Verfahren, bei dem anhand von Fotos oder Videos, zuverlässige Messungen vorgenommen werden können.      
+      Es ermöglicht die Erstellung von 3D-Modellen aus einer Reihe von überlappenden 2D-Bildern, die aus verschiedenen Perspektiven
+      aufgenommen wurden. 
+      <h4>1. Meshroom:</h4>
       <ul>
         <li>Meshroom ist eine Open-Source-Software zur 3D-Rekonstruktion aus Fotos.</li>
         <li>Sie verwendet Fotogrammetrie, um aus einer Reihe von 2D-Bildern ein 3D-Modell zu erstellen.</li>
@@ -617,7 +645,7 @@
         <strong>Video-Tutorial</strong>: <a class="blackdiv" target="_blank"
           href="https://www.youtube.com/watch?v=eiEaHLNJJ94">https://www.youtube.com/watch?v=eiEaHLNJJ94</a>
       </p>
-      <h3>2. MeshLab:</h3>
+      <h4>2. MeshLab:</h4>
       <ul>
         <li>MeshLab ist eine Open-Source-Software zur Verarbeitung und Bearbeitung von 3D-Dreiecksnetzen.</li>
         <li>Es bietet eine Reihe von Werkzeugen zum Bearbeiten, Bereinigen, Reparieren, Inspizieren, Rendern,
@@ -657,6 +685,15 @@
         <li>Luma AI</li>
         <li>Polycam</li>
       </ul>
+      </p>
+      <h3>Generative Künstliche Intelligenz</h3>
+      <p>
+        Mit KI ist es möglich, aus nur einem alten Foto oder Gemälde ein 3D Modell konstruieren zu lassen, z.B. 
+        mit SAM AI: <a class="blackdiv" target="_blank"
+          href="https://ai.meta.com/research/sam3d/">https://ai.meta.com/research/sam3d/</a>.
+        Natürlich hat dieses Verfahren seine Grenzen, was nicht auf dem Foto abgebildet ist, kann auch nicht reproduziert werden.
+        Dennoch eine faszinierende Möglichkeit, um aus alten Fotos 3D Modelle zu erstellen. Gerade für Denkmäler, die nicht mehr existieren, ist dies eine spannende Option.
+        Unter unseren "Erfolgsgeschichten" 🤍findet ihr ein Beispiel für ein 3D Modell des Domkrans von Köln, das anhand einer Aufnahme von 1868 erstellt wurde.
       </p>
       <h2 id="hilfe_wikimedia">Anleitung Fotos in Wikimedia einpflegen</h2>
       <p><a class="blackdiv" target="_blank" href="https://de.wikipedia.org/wiki/Hilfe:Bildertutorial">Hier geht es zum
@@ -705,6 +742,51 @@
         lassen sich via <i>wikimedia_commons = File:name.jpeg</i> einfach einbinden.</p>
       <p>Einen Wikipedia Artikel könnt Ihr via <i>wikipedia = de:Name der Seite</i> einbinden.</p>
 
+      <h2 id="hilfe_diy">DIY Stadtmodelle</h2>
+      <p>Wie 3D Modelle mittels Fotos erstellt werden können, haben wir bereits <a class="blackdiv"
+          href="#hilfe_model">hier</a> erklärt.</p>
+      <p>Oft existieren schon 3D Modelle unter freien Lizenzen von offiziellen Stellen, wie z.B. von Geobasis in NRW: <a
+          target="_blank" class="blackdiv"
+          href="https://www.bezreg-koeln.nrw.de/geobasis-nrw/produkte-und-dienste/3d-gebaeudemodelle">3D
+          Gebäudemodelle</a>.</p>
+      <p>Hier findest Du eine Anleitung, wie Du CityGML Daten in die freie 3D Software <a target="_blank"
+          class="blackdiv" href="https://www.blender.org">Blender</a> importieren und anpassen kannst: <a
+          target="_blank" class="blackdiv"
+          href="https://codeforcologne.github.io/Denkmal-4D-Koeln/pdf/CityGMLBlender.pdf">CityGMLBlender.pdf</a> </p>
+      <p>Es gibt inzwischen auch einen globalen Gebäudedatensatz für LoD1 Gebäude (Klötzchenmodelle), den <a
+          target="_blank" class="blackdiv" href="https://tubvsig-so2sat-vm1.srv.mwn.de/">GlobalBuildingAtlas LoD1</a>.
+      </p>
+      <p>Hier findest Du eine Anleitung, wie Du selbst Gebäudemodelle in <a target="_blank" class="blackdiv"
+          href="https://www.blender.org">Blender</a> erstellen kannst: <a target="_blank" class="blackdiv"
+          href="https://codeforcologne.github.io/Denkmal-4D-Koeln/pdf/HausModellierenBlender.pdf">HausModellierenBlender.pdf</a>
+      </p>
+      <p>Eine Anleitung, um Fotos der Gebäudefassaden auf die 3D Modelle zu mappen findest Du hier: <a target="_blank"
+          class="blackdiv"
+          href="https://codeforcologne.github.io/Denkmal-4D-Koeln/pdf/FotosAufModelleMappenBlender.pdf">FotosAufModelleMappenBlender.pdf</a>
+      </p>
+
+      <img src="images/frankenwerft.png" alt="Frankenwerft 3D Modelle">
+      <p>Hier wurden drei CityGML Modelle der Gebäude der Frankenwerft in Köln überarbeitet und mit einer Textur
+        versehen. Da ist sicherlich noch Platz nach oben 😉,
+        allerdings auch eine deutliche Verbesserung zum ursprünglichen LOD2 Modell.<br />
+        Deutlich sind die asymetrischen Dächer bei den CityGML Gebäuden zu erkennen.<br />
+        Hier wurden die durch das Laserscanning ermittelten Höhenwerte dem falschen Gebäude zugeordnet.
+      </p>
+      <p>Blender ist wirklich eine komplexe Software, aber mit etwas Übung lässt sich vieles erreichen.</p>
+      <p>Um die Modelle dann auch in einem 4D Viewer wie unserem <a target="_blank" class="blackdiv"
+          href="https://digitalheritagelab.com/denkmal-4d-cologne-cesiumed/">hier</a> zu verwenden, eignet sich z.B. die
+        freie Software
+        <a target="_blank" class="blackdiv" href="https://cesium.com/platform/cesiumjs/">CESIUMJS</a>.
+        Mittels der Plattform <a target="_blank" class="blackdiv" href="https://cesium.com/platform/cesium-ion/">CESIUM
+          ion</a> kannst du deine Daten in der Cloud hosten und in CESIUMJS einbinden.
+        Für nicht kommerzielle Projekte ist die kostenlos, allerdings budgetiert.<br />
+        Leider ist es gar nicht so einfach mit CESIUM ion 3D Tileset Location Editor dann die Gebäude auch richtig zu platzieren.<br />
+        Hier kommt es ja auf wenige Zentimeter an, und die .glb Gebäude haben leider keine Geokoordinaten.<br />
+        Deswegen haben  wir eine <a target="_blank" class="blackdiv" href="https://codeforcologne.github.io/Denkmal-4D-Koeln/positionierungshilfe_cesium_ion.html">interaktive Platzierungshilfe</a> entwickelt mit der die Koordinaten und Winkel angepasst werden können im Kontext mit einem 3D Stadtmodell. 
+        <img src="images/platzierungshilfe.png" alt="Platzierungshilfe CESIUM ion">
+        <br />
+        Achtung! Die Werte aus Cesium Ion werden z.T. etwas anders ausgelesen. Dies macht aber nichts, da die hier erstellten Werte gut passen, wenn diese nachher in Cesium Ion eingetragen werden.
+      </p>
 
 
       <h2 id="oklab">Über CodeforCologne [OK-Lab Köln]</h2>
